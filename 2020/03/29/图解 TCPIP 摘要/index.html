@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://yoursite.com').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.7.1',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="图解 TCP&#x2F;IP 摘要 七层： 各种设备以及其网络分层概念 TCP&#x2F;IP 各层对邮件的收发处理 分层中包的结构 IP地址的分类 子网的掩码子网掩码的左边是网络位，用二进制数字“1”表示，1的数目等于网络位的长度；右边是主机位，用二进制数字“0”表示，0的数目等于主机位的长度。 路由控制表路由控制表中记录着网络地址与下一步应该发送至路由器的地址。在发送 IP包时,首先要确定IP包首部中的目标地址,">
+<meta property="og:type" content="article">
+<meta property="og:title" content="图解 TCPIP 摘要">
+<meta property="og:url" content="http://yoursite.com/2020/03/29/%E5%9B%BE%E8%A7%A3%20TCPIP%20%E6%91%98%E8%A6%81/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="图解 TCP&#x2F;IP 摘要 七层： 各种设备以及其网络分层概念 TCP&#x2F;IP 各层对邮件的收发处理 分层中包的结构 IP地址的分类 子网的掩码子网掩码的左边是网络位，用二进制数字“1”表示，1的数目等于网络位的长度；右边是主机位，用二进制数字“0”表示，0的数目等于主机位的长度。 路由控制表路由控制表中记录着网络地址与下一步应该发送至路由器的地址。在发送 IP包时,首先要确定IP包首部中的目标地址,">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/00831rSTly1gcths6qsufj30nm10u12u.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/00831rSTly1gcthtoouefj30n40iuwkj.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/00831rSTly1gctjd1qcd6j30p20x4wuz.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/00831rSTly1gctjdql0vvj30ny0cy78m.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/00831rSTly1gcto2qezzcj30jq0k8thk.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/00831rSTly1gcto5m132zj30ho0di790.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/00831rSTly1gcuy3zzvgqj30ju0vmgs3.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/00831rSTgy1gcvwhgqts2j31hi0nk7j8.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/00831rSTgy1gcvwp3dirkj31080suaug.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/00831rSTgy1gcvwrw0oerj313m0u0qhn.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/00831rSTgy1gcvwz0bbtbj30u00x6alz.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/00831rSTgy1gcvxnovc7bj30hs07qab2.jpg">
+<meta property="article:published_time" content="2020-03-29T12:43:33.951Z">
+<meta property="article:modified_time" content="2020-03-29T12:43:33.951Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tva1.sinaimg.cn/large/00831rSTly1gcths6qsufj30nm10u12u.jpg">
+
+<link rel="canonical" href="http://yoursite.com/2020/03/29/%E5%9B%BE%E8%A7%A3%20TCPIP%20%E6%91%98%E8%A6%81/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>图解 TCPIP 摘要 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/29/%E5%9B%BE%E8%A7%A3%20TCPIP%20%E6%91%98%E8%A6%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          图解 TCPIP 摘要
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-03-29 20:43:33" itemprop="dateCreated datePublished" datetime="2020-03-29T20:43:33+08:00">2020-03-29</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="图解-TCP-IP-摘要"><a href="#图解-TCP-IP-摘要" class="headerlink" title="图解 TCP/IP 摘要"></a>图解 TCP/IP 摘要</h1><ol>
+<li>七层：<br><img src="https://tva1.sinaimg.cn/large/00831rSTly1gcths6qsufj30nm10u12u.jpg" alt="img"></li>
+<li>各种设备以及其网络分层概念<br><img src="https://tva1.sinaimg.cn/large/00831rSTly1gcthtoouefj30n40iuwkj.jpg" alt="img"></li>
+<li>TCP/IP 各层对邮件的收发处理<br><img src="https://tva1.sinaimg.cn/large/00831rSTly1gctjd1qcd6j30p20x4wuz.jpg" alt="img"></li>
+<li>分层中包的结构<br><img src="https://tva1.sinaimg.cn/large/00831rSTly1gctjdql0vvj30ny0cy78m.jpg" alt="img"></li>
+<li>IP地址的分类<br><img src="https://tva1.sinaimg.cn/large/00831rSTly1gcto2qezzcj30jq0k8thk.jpg" alt="img"></li>
+<li>子网的掩码<br>子网掩码的左边是网络位，用二进制数字“1”表示，1的数目等于网络位的长度；右边是主机位，用二进制数字“0”表示，0的数目等于主机位的长度。<br><img src="https://tva1.sinaimg.cn/large/00831rSTly1gcto5m132zj30ho0di790.jpg" alt="img"></li>
+<li>路由控制表<br>路由控制表中记录着网络地址与下一步应该发送至路由器的地址。<br>在发送 IP包时,首先要确定IP包首部中的目标地址,再从路由控制表中找到与该地址具有相同网络地址的记录,根据该记录将IP包转发给相应的下一个路由器。如果路由控制表中存在多条相同网络地址的记录，就选择一个最为吻合的网络地址。</li>
+<li>DNS<br>DNS 可以维护一个用来表示组织内部组织名（域名）和 IP 地址之间对应关系的数据库。当用户输入域名，DNS 会自动检测那个注册了主机名和 IP 地址的数据库，并迅速定位对应的 IP 地址。</li>
+<li>UDP 概念<ul>
+<li>UDP 不提供复杂的控制机制，利用 IP 提供面向无连接的通信服务。</li>
+<li>UDP 是将应用程序发来的数据在收到的那一刻，立即按照原样发送到网络上的一种机制。即使是出现网络拥堵的情况，UDP 也无法进行流量控制等避免网络拥塞行为。</li>
+<li>传输途中出现丢包，UDP 也不负责重发。</li>
+<li>当包的到达顺序出现乱序时也没有纠正的功能</li>
+</ul>
+</li>
+<li>UDP 使用场景<ol>
+<li>包总量较少的通信（DNS、SNMP等）</li>
+<li>视频、音频等多媒体通信（即时通信）</li>
+<li>限定于 LAN 等特定网络中的应用通信</li>
+<li>广播通信（广播、多播）</li>
+</ol>
+</li>
+<li>TCP 的三次握手和四次挥手<br><img src="https://tva1.sinaimg.cn/large/00831rSTly1gcuy3zzvgqj30ju0vmgs3.jpg" alt="img"><ul>
+<li>ACK（Acknowledge character）确认字符： TCP协议规定，只有ACK=1时有效，也规定连接建立后所有发送的报文的ACK必须为1</li>
+<li>SYN（SYNchronization）： 在连接建立时用来同步序号。当SYN=1而ACK=0时，表明这是一个连接请求报文。对方若同意建立连接，则应在响应报文中使SYN=1和ACK=1. 因此, SYN置1就表示这是一个连接请求或连接接受报文。</li>
+<li>FIN（finish）即完成、终结的意思， 用来释放一个连接。当 FIN = 1 时，表明此报文段的发送方的数据已经发送完毕，并要求释放连接。</li>
+</ul>
+</li>
+<li>TCP 三次握手分别指<br>（1）第一次握手：创建连接请求<br>客户端发送创建连接请求报文段，该报文段的头部中SYN=1，seq=x。请求发送后，客户端便进入SYN-SENT状态。<br>（2）第二次握手：服务器收到SYN报文段<br>服务端收到连接请求报文段后，如果同意连接，则会发送一个应答：SYN=1，ACK=1，seq=y，ack=x+1。 此时服务器进入SYN_RECV状态。<br>（3）第三次握手：客户端收到服务器的SYN+ACK报文段<br>当客户端收到创建连接同意的应答后，还要向服务端发送一个确认报文段，告诉服务端发来的连接同意应答已经成功收到。<br>该报文段的头部为：ACK=1，ack=y+1。<br>客户端发完这个报文段后便进入ESTABLISHED状态，服务端收到这个确认应答后也进入ESTABLISHED状态，此时连接的建立完成。</li>
+<li>TCP 四次挥手分别指<br>TCP连接是双向的，因此在四次挥手中，前两次挥手用于断开一个方向的连接，后两次挥手用于断开另一方向的连接。<br>（1）第一次挥手：客户端向服务端发送一个FIN报文段：FIN=1，seq=u，客户端进入FIN_WAIT_1状态，表示客户端没有数据要发送给服务端了。FIN=1，表示要关闭一个方向的连接<br>（2）第二次挥手：服务端收到了客户端发送的FIN报文段，向客户端回一个ACK报文段，ACK=1，ack=u=1,服务端告诉客户端同意关闭请求，客户端进入FIN_WAIT_2状态。<br>（3）第三次挥手：服务端向客户端发送FIN报文段，请求关闭连接，同时服务端进入LAST_ACK状态；<br>（4）第四次挥手：客户端收到服务端发送的FIN报文段，向服务端发送ACK报文段，然后客户端进入TIME_WAIT状态；服务端收到客户端的ACK报文段以后，就关闭连接；此时，客户端等待2MSL后依然没有收到回复，则证明Server端已正常关闭，客户端也可以关闭连接了。</li>
+<li>为什么连接建立需要三次握手，而不是两次握手？<br>防止失效的连接请求报文段被服务端接收，从而产生错误。<br>失效的连接请求：若客户端向服务端发送的连接请求丢失，客户端等待应答超时后就会再次发送连接请求，此时，上一个连接请求就是失效的。<br>如果建立连接只需两次握手，客户端并没有太大的变化，仍然需要获得服务端的应答后才进入ESTABLISHED状态，而服务端在收到连接请求后就进入ESTABLISHED状态。<br>如果网络拥塞，客户端发送的连接请求迟迟到不了服务端，客户端便超时重发请求，如果服务端正确接收并确认应答，双方便开始通信，通信结束后释放连接。<br>如果那个失效的连接请求抵达了服务端，由于只有两次握手，服务端收到请求就会进入ESTABLISHED状态，等待发送数据或主动发送数据。但此时的客户端早已进入CLOSED状态，服务端将会一直等待下去，这样浪费服务端连接资源。</li>
+<li>为什么连接的时候是三次握手，关闭的时候却是四次握手？<br>创建连接时，当Server端收到Client端的SYN连接请求报文后，可以直接发送SYN+ACK报文。其中ACK报文是用来应答的，SYN报文是用来同步的。<br>关闭连接时，当Server端收到FIN报文时，并不会立即关闭SOCKET，所以只能先回复一个ACK报文，告诉Client端，“FIN报文我收到了”。只有等到Server端所有的报文都发送完了，才能发送FIN报文，因此不能一起发送。故需要四步握手。</li>
+<li>为什么客户端要先进入TIME-WAIT状态，等待2MSL（最大报文段生存时间)）时间后才进入CLOSED状态？<br>为了保证服务端能收到客户端的确认应答，如果客户端发完确认应答后直接进入CLOSED状态，那么如果该应答丢失，服务端等待超时后就会重新发送连接释放请求，但此时客户端已经关闭了，不会作出任何响应，因此服务端永远无法正常关闭。</li>
+<li>TCP 和 UDP 的区别<ol>
+<li>TCP是面向连接（如打电话要先拨号建立连接）;UDP是无连接的，即发送数据之前不需要建立连接</li>
+<li>TCP提供可靠的服务。也就是说，通过TCP连接传送的数据，无差错，不丢失，不重复，且按序到达;UDP尽最大努力交付，即不保证可靠交付</li>
+<li>TCP面向字节流，实际上是TCP把数据看成一连串无结构的字节流;UDP是面向报文的UDP没有拥塞控制，因此网络出现拥塞不会使源主机的发送速率降低（对实时应用很有用，如IP电话，实时视频会议等）</li>
+<li>每一条TCP连接只能是点到点的;UDP支持一对一，一对多，多对一和多对多的交互通信</li>
+<li>TCP首部开销20字节;UDP的首部开销小，只有8个字节</li>
+<li>TCP的逻辑通信信道是全双工的可靠信道，UDP则是不可靠信道</li>
+</ol>
+</li>
+<li>TCP 如何保证可靠性<br>TCP 通过校验和、序列号（下一批应该发什么数据）、确认应答、重发机制（超时重发或三次确认重发）、连接管理（三次握手四次挥手）、滑动窗口等机制实现可靠行传输。</li>
+<li>滑动窗口<br>单个确认应答效率差，以一个更大的单位进行确认时，转发时间会被大幅度缩短。<br><img src="https://tva1.sinaimg.cn/large/00831rSTgy1gcvwhgqts2j31hi0nk7j8.jpg" alt="img"><ul>
+<li>发送端主机在确认应答返回之前，必须把发送的数据给保存在缓冲区中，当数据发送后如期收到确认应答就可以不重发数据，这些数据就可以在缓存中清除。收到应答后，将滑动窗口滑倒确认应答中的序列号的位置，这样就能以顺序的多个段同时发送数据以提高效率。<br><img src="https://tva1.sinaimg.cn/large/00831rSTgy1gcvwp3dirkj31080suaug.jpg" alt="img"></li>
+</ul>
+</li>
+<li>重发机制<br><img src="https://tva1.sinaimg.cn/large/00831rSTgy1gcvwrw0oerj313m0u0qhn.jpg" alt="img"></li>
+<li>流控制<br>它的具体操作是，接收端主机向发送端主机通知自己可以接收数据的大小，于是发送端会发送不超过这个限度的数据。该大小限度就被称作窗口大小。</li>
+<li>拥塞控制<br>在网络出现拥堵时，如果突然发送一个较大量的数据，极有可能会导致整个网络的瘫痪。TCP 为了防止该问题的出现，在通信一开始时就会通过一个叫做慢启动的算法得出的数值，对发送数据量进行控制。<ul>
+<li>慢启动<br>慢启动算法的基本思想是当TCP开始在一个网络中传输数据或发现数据丢失并开始重发时，首先慢慢的对网路实际容量进行试探，避免由于发送了过量的数据而导致阻塞。主机发送了一个报文后就要停下来等待应答，每收到一个应答，拥塞窗口就增加一段长度，直至等于设定的阈值。比如我们可以先让发送方发一个包，等这个包被 ack 之后，我们再发 2 个包，这 2 个被 ack 之后再发 4 个包，以此类推，让一次所发的包数量慢慢增加，这就是慢启动。<br><img src="https://tva1.sinaimg.cn/large/00831rSTgy1gcvwz0bbtbj30u00x6alz.jpg" alt="img"></li>
+</ul>
+</li>
+<li>拥塞避免算法<br>拥塞避免算法让拥塞窗口缓慢增长，即每经过一个往返时间RTT就把发送方的拥塞窗口cwnd加1，而不是加倍。这样拥塞窗口按线性规律缓慢增长。<br><img src="https://tva1.sinaimg.cn/large/00831rSTgy1gcvxnovc7bj30hs07qab2.jpg" alt="img"></li>
+<li>拥塞控制和流量控制的区别<ul>
+<li>拥塞控制：拥塞控制是作用于网络的，它是防止过多的数据注入到网络中，避免出现网络负载过大的情况；常用的方法就是：（1）慢开始、拥塞避免（2）快重传、快恢复。</li>
+<li>流量控制：流量控制是作用于接收者的，它是控制发送者的发送速度从而使接收者来得及接收，防止分组丢失的。</li>
+</ul>
+</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/29/InnoDB%E5%A4%87%E4%BB%BD%E4%B8%8E%E6%81%A2%E5%A4%8D/" rel="prev" title="InnoDB备份与恢复">
+      <i class="fa fa-chevron-left"></i> InnoDB备份与恢复
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/03/29/%E7%AE%97%E6%B3%95%E5%AF%BC%E8%AE%BA-%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/" rel="next" title="算法导论-动态规划">
+      算法导论-动态规划 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#图解-TCP-IP-摘要"><span class="nav-number">1.</span> <span class="nav-text">图解 TCP&#x2F;IP 摘要</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.7.1
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

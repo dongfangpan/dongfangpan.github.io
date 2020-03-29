@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://yoursite.com').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.7.1',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="独立功能实现发布与订阅Redis 的发布与订阅功能有 PUBLISH、SUBSCRIBE、PSUBSCRIBE 等命令组成。通过执行 SUBSCRIBE 命令，客户端可以订阅一个或多个频道，从而成为这些频道的订阅者（subscriber）：客户端可以通过执行 PSUBSCRIBE 命令订阅一个或多个模式，从而成为这些模式的订阅者： 频道和模式的订阅与退订 12345678910111213stru">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis独立功能实现">
+<meta property="og:url" content="http://yoursite.com/2020/03/29/Redis%E7%8B%AC%E7%AB%8B%E5%8A%9F%E8%83%BD%E5%AE%9E%E7%8E%B0/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="独立功能实现发布与订阅Redis 的发布与订阅功能有 PUBLISH、SUBSCRIBE、PSUBSCRIBE 等命令组成。通过执行 SUBSCRIBE 命令，客户端可以订阅一个或多个频道，从而成为这些频道的订阅者（subscriber）：客户端可以通过执行 PSUBSCRIBE 命令订阅一个或多个模式，从而成为这些模式的订阅者： 频道和模式的订阅与退订 12345678910111213stru">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006tNbRwgy1gbi9aesmvzj312w090jug.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006tNbRwgy1gbi97qzy7oj31bg0be0xw.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/0082zybply1gbnx37m3j8j31ew0a8gpj.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006tNbRwgy1gbibh8ke99j30og0iydjk.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006tNbRwgy1gbibkx6gt0j31160m0te8.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006tNbRwgy1gbj8mrtxkxj31gq0hi0zb.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006tNbRwgy1gbjaechecmj30sy0acq51.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006tNbRwgy1gbjaax04qyj30tg0awq55.jpg">
+<meta property="article:published_time" content="2020-03-29T12:39:24.090Z">
+<meta property="article:modified_time" content="2020-03-29T12:39:29.478Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tva1.sinaimg.cn/large/006tNbRwgy1gbi9aesmvzj312w090jug.jpg">
+
+<link rel="canonical" href="http://yoursite.com/2020/03/29/Redis%E7%8B%AC%E7%AB%8B%E5%8A%9F%E8%83%BD%E5%AE%9E%E7%8E%B0/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>Redis独立功能实现 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/29/Redis%E7%8B%AC%E7%AB%8B%E5%8A%9F%E8%83%BD%E5%AE%9E%E7%8E%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Redis独立功能实现
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2020-03-29 20:39:24 / Modified: 20:39:29" itemprop="dateCreated datePublished" datetime="2020-03-29T20:39:24+08:00">2020-03-29</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="独立功能实现"><a href="#独立功能实现" class="headerlink" title="独立功能实现"></a>独立功能实现</h1><h2 id="发布与订阅"><a href="#发布与订阅" class="headerlink" title="发布与订阅"></a>发布与订阅</h2><p>Redis 的发布与订阅功能有 <code>PUBLISH、SUBSCRIBE、PSUBSCRIBE</code> 等命令组成。<br>通过执行 <code>SUBSCRIBE</code> 命令，客户端可以订阅一个或多个频道，从而成为这些频道的订阅者（subscriber）：<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbi9aesmvzj312w090jug.jpg" alt="img"><br>客户端可以通过执行 <code>PSUBSCRIBE</code> 命令订阅一个或多个模式，从而成为这些模式的订阅者：<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbi97qzy7oj31bg0be0xw.jpg" alt="img"></p>
+<p><strong>频道和模式的订阅与退订</strong><br><img src="https://tva1.sinaimg.cn/large/0082zybply1gbnx37m3j8j31ew0a8gpj.jpg" alt="img"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">redisServer</span> &#123;</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// 保存所有频道的订阅关系：键是被订阅的频道，值是所有订阅者的链表</span></span><br><span class="line">    <span class="comment">// 若订阅时频道有其他订阅者，则在链表尾部添加该订阅者；若订阅时频道没有其他订阅者，则创建键，再把客户端添加到链表头</span></span><br><span class="line">    <span class="comment">// 退订时也会检查退订者是否为该频道唯一订阅者，若不是则在链表中删除该订阅者，若是连带键（频道）一起删除</span></span><br><span class="line">    dict *pubsub_channels;</span><br><span class="line">    </span><br><span class="line">   <span class="comment">// 保存所有模式订阅关系：链表的每个节点保存着一个pubsubPattern结构，记录了客户端（client）和模式（pattern）</span></span><br><span class="line">   <span class="comment">// 客户端订阅模式时，新建一个与该客户端对应的pubsubPattern结构，添加在链表尾部</span></span><br><span class="line">   <span class="comment">// 客户端退订模式时，会在链表中删除与该客户端对应的模式的pubsubPattern结构</span></span><br><span class="line">   <span class="built_in">list</span> *pubsub_petterns;</span><br><span class="line">   ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>查看订阅消息</strong><br><code>PUBSUB CHANNELS [pattern]</code>用于返回服务器当前被订阅的频道。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">redis&gt; PUBSUB CHANNELS</span><br><span class="line">1) &quot;news.it&quot;</span><br><span class="line">2) &quot;news.sport&quot;</span><br><span class="line">3) &quot;news.bussiness&quot;</span><br><span class="line">4) &quot;news.movie&quot;</span><br><span class="line"></span><br><span class="line">redis&gt; PUBSUB CHANNELS &quot;news.[is]*&quot;</span><br><span class="line">1) &quot;news.it&quot;</span><br><span class="line">2) &quot;news.sport&quot;</span><br></pre></td></tr></table></figure>
+
+<p><code>PUBSUB NUMSUB [channel-1 ... channel-n]</code>用于返回频道的订阅者数量</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">redis&gt; PUBSUB NUMSUB news.it news.sport</span><br><span class="line">1) &quot;news.it&quot;</span><br><span class="line">2) 3</span><br><span class="line">3) &quot;news.sport&quot;</span><br><span class="line">4) 2</span><br></pre></td></tr></table></figure>
+
+<p><code>PUBSUB NUMPAT</code>用于返回服务器当前被订阅模式的数量</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">redis&gt; PUBSUB NUMPAT</span><br><span class="line">(integer) 3</span><br></pre></td></tr></table></figure>
+
+<h2 id="事务"><a href="#事务" class="headerlink" title="事务"></a>事务</h2><p><strong>事务的实现：</strong></p>
+<ol>
+<li>事务开始：<code>MULTI</code></li>
+<li>命令入队：除 <code>EXEC、DISCARD、WATCH、MULTI</code> 外的可执行命令</li>
+<li>事务执行：<code>EXEC</code></li>
+</ol>
+<p><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbibh8ke99j30og0iydjk.jpg" alt="img"></p>
+<p><strong>事务队列（FIFO）</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; MULTI</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; SET &quot;name&quot; &quot;Practical Common Lisp&quot;</span><br><span class="line">QUEUED</span><br><span class="line">127.0.0.1:6379&gt; GET &quot;name&quot;</span><br><span class="line">QUEUED</span><br><span class="line">127.0.0.1:6379&gt; SET &quot;author&quot; &quot;Peter Serbel&quot;</span><br><span class="line">QUEUED</span><br><span class="line">127.0.0.1:6379&gt; GET &quot;author&quot;</span><br><span class="line">QUEUED</span><br><span class="line">127.0.0.1:6379&gt; EXEC</span><br><span class="line">1) OK</span><br><span class="line">2) &quot;Practical Common Lisp&quot;</span><br><span class="line">3) OK</span><br><span class="line">4) &quot;Peter Serbel&quot;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbibkx6gt0j31160m0te8.jpg" alt="img"></p>
+<p><strong>WATCH 命令的实现</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 当前客户端为c100，对c100执行WATCH命令</span><br><span class="line">c100&gt; WATCH &quot;name&quot;</span><br><span class="line">OK</span><br><span class="line">&#x2F;&#x2F; 客户端c100继续向服务器发送MULTI命令</span><br><span class="line">c100&gt; MULTI</span><br><span class="line">OK</span><br><span class="line">&#x2F;&#x2F; c100将一个SET命令放入事务队列</span><br><span class="line">c100&gt; SET &quot;name&quot; &quot;peter&quot;</span><br><span class="line">QUEUE</span><br><span class="line">&#x2F;&#x2F; 另一个客户端c101向服务器发送一条SET命令</span><br><span class="line">c101&gt; SET &quot;name&quot; &quot;john&quot;</span><br><span class="line">OK</span><br><span class="line">&#x2F;&#x2F; c101发的这条命令会使正在监视的name键的所有客户端的REDIS_DIRTY_CAS标识被打开，包括c100</span><br><span class="line">&#x2F;&#x2F; 当c100向服务器发送EXEC命令时，因为c100的REDIS_DIRTY_CAS标识被打开，所以拒绝执行它提交的事务</span><br><span class="line">c100&gt; EXEC</span><br><span class="line">(nil)</span><br></pre></td></tr></table></figure>
+
+<p><strong>事物的ACID性质</strong></p>
+<ol>
+<li>原子性：<br>数据库将事务中的多个操作当作一个整体来执行，要么都执行，要么都不执行。Redis 不支持事物会滚，即使事务中某个命令出现了错误，整个事务也会继续执行，直到都执行完毕为止，执行完了错误也会一并打印出来。</li>
+<li>一致性：<br>数据库在执行之前是一致的（数据符合数据库本身的定义和要求，没有包含非法或无效的错误数据），那执行事务之后无论成功与否数据库也是一致的。</li>
+<li>隔离性：<br>多个事务并发执行，也不会互相影响。</li>
+<li>持久性<br>当事务执行完了之后，所得到的结果会保存到永久性储存介质（如硬盘）中，即使执行事务完毕之后停机了，结果也不会丢失。<br>在 RDB 持久化模式下，需要执行 <code>BGSAVE</code> 才会对数据库进行保存，数据不能第一时间保存到硬盘里，所以 RDB 模式下的事务不具有持久性。<br>在 AOF 持久化模式下，如果 <code>appendfsync</code> 设置为 always，则事务具有持久性，设置为 everysec 或者 no 时不具有持久性</li>
+</ol>
+<h2 id="排序"><a href="#排序" class="headerlink" title="排序"></a>排序</h2><p>SORT 命令通过将被排序键包含的元素载入到数组里面，然后对数组进行排序完成对键进行排序的工作，该操作是有快速排序算法实现的。</p>
+<p><strong>排序过程</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbj8mrtxkxj31gq0hi0zb.jpg" alt="img"></p>
+<p><strong>选项的执行顺序</strong></p>
+<ol>
+<li>排序：命令使用 <code>ALPHA、ASC、DESC、BY</code> 这几个选项对键进行排序。</li>
+<li>限制排序结果集的长度：命令使用 <code>LIMIT</code> 选项对结果集进行限制。</li>
+<li>获取外部键：命令使用 <code>GET</code> 选项，根据排序结果集中的元素，以及 <code>GET</code> 选项制定模式，查找并获取指定键的值，并用这些值来做为新的排序结果集。</li>
+<li>保存结果集：命令使用 <code>STORE</code> 选项，把结果集保存到指定键上去。</li>
+</ol>
+<p><strong>例子</strong><br><code>SORT  ALPHA DESC BY  LIMIT   GET  STORE</code><br><strong>执行顺序</strong><br><code>SORT  ALPHA DESC BY</code> -&gt; <code>LIMIT</code> -&gt; <code>GET</code> -&gt; <code>STORE</code><br><em>除 <code>GET</code> 外，改变选项的摆放顺序，不会影响到SORT命令执行这些选项的顺序</em></p>
+<h2 id="慢查询日志"><a href="#慢查询日志" class="headerlink" title="慢查询日志"></a>慢查询日志</h2><p>服务器状态中包含了几个和慢查询日志功能相关的属性：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">rdisServer</span> &#123;</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// 下一条慢查询日志的ID</span></span><br><span class="line">    <span class="keyword">long</span> <span class="keyword">long</span> slowlog_entry_id;</span><br><span class="line">    <span class="comment">// 保存了所有慢查询日志的链表</span></span><br><span class="line">    <span class="comment">// 每一个节点都保存了一个slowlogEntry结构，每个slowlogEntry结构代表一条慢查询日志</span></span><br><span class="line">    <span class="built_in">list</span> *slowlog;</span><br><span class="line">    <span class="comment">// 指定执行时间超过多少微秒的命令会被记录在日志上</span></span><br><span class="line">    <span class="keyword">long</span> <span class="keyword">long</span> slowlog_log_slower_than;</span><br><span class="line">    <span class="comment">// 指定服务器最多保存多少条慢查询日志</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> slowlog_max_len;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>慢查询相关rdisServer结构</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbjaechecmj30sy0acq51.jpg" alt="img"><br><strong>slowlogEntry结构</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbjaax04qyj30tg0awq55.jpg" alt="img"></p>
+<p><strong>slowlog特性</strong></p>
+<ol>
+<li>打印删除慢查询日志可以通过遍历 slowlog 链表来完成。</li>
+<li>slowlog 链表的长度就是服务器所保存慢查询日志的数量。</li>
+<li>新的慢查询日志会被添加到 slowlog 链表表头，如果日志数量超过<code>slowlog-max-len</code>选项的值，多出来的日志节点会从 slowlog 表尾删除。</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/29/Redis%E5%A4%9A%E6%9C%BA%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AE%9E%E7%8E%B0/" rel="prev" title="Redis多机数据库的实现">
+      <i class="fa fa-chevron-left"></i> Redis多机数据库的实现
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/03/29/InnoDB%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/" rel="next" title="InnoDB存储引擎">
+      InnoDB存储引擎 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#独立功能实现"><span class="nav-number">1.</span> <span class="nav-text">独立功能实现</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#发布与订阅"><span class="nav-number">1.1.</span> <span class="nav-text">发布与订阅</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#事务"><span class="nav-number">1.2.</span> <span class="nav-text">事务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#排序"><span class="nav-number">1.3.</span> <span class="nav-text">排序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#慢查询日志"><span class="nav-number">1.4.</span> <span class="nav-text">慢查询日志</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.7.1
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

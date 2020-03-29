@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://yoursite.com').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.7.1',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="InnoDB存储引擎InnoDB体系架构后台线程线程类型：  Master Thread：负责将缓冲池中的数据异步刷新到磁盘，保证数据一致性（脏页刷新、合并插入缓冲、undo页回收）。 IO Thread：InnoDB 用了大量 AIO（Async IO）处理写 IO 请求，IO Thread 负责这些 IO 请求的回调处理。 Purge Thread：回收已经使用并分配的 undo 页。 Pag">
+<meta property="og:type" content="article">
+<meta property="og:title" content="InnoDB存储引擎">
+<meta property="og:url" content="http://yoursite.com/2020/03/29/InnoDB%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="InnoDB存储引擎InnoDB体系架构后台线程线程类型：  Master Thread：负责将缓冲池中的数据异步刷新到磁盘，保证数据一致性（脏页刷新、合并插入缓冲、undo页回收）。 IO Thread：InnoDB 用了大量 AIO（Async IO）处理写 IO 请求，IO Thread 负责这些 IO 请求的回调处理。 Purge Thread：回收已经使用并分配的 undo 页。 Pag">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/0082zybpgy1gbsr8nebt7j31680iqag2.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/0082zybpgy1gbtiwa09bej313y0j2n2t.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/0082zybpgy1gbtu60dga3j30j60dm767.jpg">
+<meta property="article:published_time" content="2020-03-29T12:40:01.911Z">
+<meta property="article:modified_time" content="2020-03-29T12:40:01.911Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tva1.sinaimg.cn/large/0082zybpgy1gbsr8nebt7j31680iqag2.jpg">
+
+<link rel="canonical" href="http://yoursite.com/2020/03/29/InnoDB%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>InnoDB存储引擎 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/29/InnoDB%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          InnoDB存储引擎
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-03-29 20:40:01" itemprop="dateCreated datePublished" datetime="2020-03-29T20:40:01+08:00">2020-03-29</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="InnoDB存储引擎"><a href="#InnoDB存储引擎" class="headerlink" title="InnoDB存储引擎"></a>InnoDB存储引擎</h1><h2 id="InnoDB体系架构"><a href="#InnoDB体系架构" class="headerlink" title="InnoDB体系架构"></a>InnoDB体系架构</h2><h3 id="后台线程"><a href="#后台线程" class="headerlink" title="后台线程"></a>后台线程</h3><p><strong>线程类型：</strong></p>
+<ol>
+<li>Master Thread：负责将缓冲池中的数据异步刷新到磁盘，保证数据一致性（脏页刷新、合并插入缓冲、undo页回收）。</li>
+<li>IO Thread：InnoDB 用了大量 AIO（Async IO）处理写 IO 请求，IO Thread 负责这些 IO 请求的回调处理。</li>
+<li>Purge Thread：回收已经使用并分配的 undo 页。</li>
+<li>Page Cleaner Thread：减轻原 Master Thread 的工作，提高 InnoDB 存储性能。</li>
+</ol>
+<h3 id="内存"><a href="#内存" class="headerlink" title="内存"></a>内存</h3><h4 id="缓冲池"><a href="#缓冲池" class="headerlink" title="缓冲池"></a>缓冲池</h4><ul>
+<li>缓冲区是一块内存区域，通过内存的速度来弥补磁盘速度较慢对数据库性能影响。</li>
+<li>数据库首次读取页时，会把从磁盘里读取的页放在缓冲池中，下次该页被缓冲池命中，则读取页，否则，在磁盘里中读取。</li>
+<li>对于数据库中的页的修改操作，先修改缓存池中的页，再以一定的频率刷到磁盘中。（Checkpoint 机制）</li>
+<li>InnoDB内存数据对象<br><img src="https://tva1.sinaimg.cn/large/0082zybpgy1gbsr8nebt7j31680iqag2.jpg" alt="img"></li>
+</ul>
+<p><strong>LRU list</strong></p>
+<ul>
+<li>通常来说，数据库的缓冲池是通过 LRU 算法进行管理的（频繁使用的页在列表最前端，最少使用的页在尾端）。</li>
+<li>优化的 LRU 算法：新读到的页放到 LRU 列表的 midpoint 位置。（原因：当进行某些操作如索引或数据的扫描，可能会使缓冲池中的页被刷新出，影响缓冲池效率。这些操作访问的很多页都是仅在这次操作中需要，并不是活跃数据。）</li>
+</ul>
+<p><strong>LRU list vs Free list</strong><br>数据库刚启动时，LRU 列表是空的，所有页都存在 Free 列表中。当需要从缓冲池中分页时，首先从 Free 列表中查找是否有空闲页，若有则将该页从 Free 列表中删除，放入到 LRU 列表中。</p>
+<p><strong>脏页和Flush list</strong><br>在 LRU 列表中的页被修改后，称该页为脏页，即缓冲池中的页和磁盘上的页的数据产生了不一致。数据库会通过 CHECKPOINT 机制将脏页刷新回磁盘，Flush 列表中的页就是脏页列表。</p>
+<h4 id="重做日志缓冲、额外的内存池"><a href="#重做日志缓冲、额外的内存池" class="headerlink" title="重做日志缓冲、额外的内存池"></a>重做日志缓冲、额外的内存池</h4><p><strong>重做日志缓冲：</strong></p>
+<ul>
+<li>InnoDB 存储引擎首先将重做日志信息放到这个缓冲区，然后按照一定的频率刷新到重做日志文件。</li>
+<li>一般情况下 重做日志缓冲池只需要 8M 就够了，因为重做日志会在下面三种情况把内存刷到外部磁盘的重做日志文件中：<ul>
+<li>Master Thread 每一秒就会进行刷新操作</li>
+<li>每个事务提交就会进行刷新操作</li>
+<li>重做日志缓冲池空间剩余1/2时会进行刷新操作。</li>
+</ul>
+</li>
+</ul>
+<p><strong>额外的内存池：</strong><br>对一些数据结构本身的内存进行分配时，需要从额外的内存池中进行申请，当该区域不够时，会向缓冲池中进行申请。</p>
+<h3 id="Checkpoint-技术"><a href="#Checkpoint-技术" class="headerlink" title="Checkpoint 技术"></a>Checkpoint 技术</h3><p>Checkpoint 技术的目的是为了解决：</p>
+<ol>
+<li>缩短数据库的恢复时间<br>当数据库发生宕机时，数据库不需要重做所有的日志，因为 Checkpoint 之前的页都已经刷新回磁盘。</li>
+<li>缓冲池不够用时，将脏页刷新到磁盘<br>当缓冲池不够用时，LRU 算法回溢出最近最少使用的页，如果这个页是脏页，就前置执行 Checkpoint，将脏页刷进磁盘。</li>
+<li>重做日志不可用时，刷新脏页</li>
+</ol>
+<p>Innodb 有2种 Checkpoint</p>
+<ol>
+<li>Sharp Checkpoint：发生在数据库关闭时将所有的脏页都刷新回磁盘。</li>
+<li>Fuzzy Checkpoint：进行页刷新时，只刷新一部分脏页。<br>Master Thread Checkpoint、FLUSH_LRU_LIST Checkpoint、Async/Sync Flush Checkpoint、Dirty Page too much Checkpoint 都属于Fuzzy Checkpoint</li>
+</ol>
+<h3 id="InnoDB关键特性"><a href="#InnoDB关键特性" class="headerlink" title="InnoDB关键特性"></a>InnoDB关键特性</h3><h4 id="插入缓冲"><a href="#插入缓冲" class="headerlink" title="插入缓冲"></a>插入缓冲</h4><p><strong>Insert Buffer</strong></p>
+<ul>
+<li>Insert Buffer 和数据页一样，都是物理页的一个组成部分，并不是缓冲池中的一部分。</li>
+<li>插入聚集索引（Primary Key）是顺序的不需要磁盘随机读；对于非聚集辅助索引（secondary index）叶子节点的插入不是顺序的，需要离散的访问非聚集索引页，导致插入操作新能下降。（有些辅助索引插入仍是顺序的，比如ctime）</li>
+<li>对于非聚集索引的插入或更新操作，不是每一次都直接插入到索引页中，而是先判断插入的非聚集索引页是否在缓冲池中，若在直接插入，若不在先放到 Insert Buffer 对象中。然后以一定的频率和情况进行 Insert Buffer 和辅助索引叶子节点的 merge 操作。</li>
+<li>使用 Insert Buffer 需要满足一下子2个条件<ol>
+<li>索引是辅助索引</li>
+<li>索引不是唯一索引</li>
+</ol>
+</li>
+<li>例子：2246304 次 merge 可以 merge 7540969数据，比例差不多是1:3，代表了插入缓冲将对于非聚聚索引页的离散 IO 逻辑请求大约降低了 2/3</li>
+<li>Insert Buffer 的数据结构是一棵 B+ 树（非叶子节点存放的是查询的键值）</li>
+</ul>
+<p><strong>Change Buffer</strong></p>
+<ul>
+<li>Change Buffer 是 Insert Buffer 的升级，引入了 Delete Buffer 和 Purge Buffer。（对象依旧是非唯一的辅助索引）</li>
+<li>Delete 操作可能分为2个过程：<ol>
+<li>将记录标记为已删除（Delete Buffer 操作）</li>
+<li>真正将记录删除（Purge Buffer 操作）</li>
+</ol>
+</li>
+<li>SHOW ENGINE INNODB STATUS 展示：<br><img src="https://tva1.sinaimg.cn/large/0082zybpgy1gbtiwa09bej313y0j2n2t.jpg" alt="img"><br>insert 表示 Insert Buffer；delete mark 表示 Delete Buffer；delete 表示 Purge Buffer</li>
+</ul>
+<h3 id="两次写"><a href="#两次写" class="headerlink" title="两次写"></a>两次写</h3><p>为了解决partial page write问题，InnoDB实现了double write buffer，简单来说，就是在写数据页之前，先把这个数据页写到一块独立的物理文件位置（ibdata），然后再写到数据页。这样在宕机重启时，如果出现数据页损坏，那么在应用redo log之前，需要通过该页的副本来还原该页，然后再进行redo log重做，这就是double write。<br>工作流程：<br><img src="https://tva1.sinaimg.cn/large/0082zybpgy1gbtu60dga3j30j60dm767.jpg" alt="img"></p>
+<h3 id="自适应哈希索引"><a href="#自适应哈希索引" class="headerlink" title="自适应哈希索引"></a>自适应哈希索引</h3><ul>
+<li>InnoDB存储引擎会监控对表上各索引页的查询。如果观察到建立哈希索引可以带来速度提升,则建立哈希索引,称之为自适应哈希索引(Adaptive Hash Index,AHI) 。</li>
+<li>经常访问的二级索引数据（热点数据）会自动被生成到hash索引里面去(最近连续被访问三次的数据)，自适应哈希索引通过缓冲池的B+树构造而来，因此建立的速度很快。</li>
+<li>AHI 要求：<ul>
+<li>以该模式访问了100次</li>
+<li>页通过该模式访问了N次（N=页中记录 * 1/16）</li>
+</ul>
+</li>
+<li>AHI 缺点：<ol>
+<li>hash自适应索引会占用innodb buffer pool；</li>
+<li>自适应hash索引只适合搜索等值的查询（例如=、&lt;=&gt;、in），如select * from table where index_col=’xxx’，而对于其他查找类型，如范围查找，是不能使用的；</li>
+<li>极端情况下，自适应hash索引才有比较大的意义，可以降低逻辑读。</li>
+<li>无法用于排序</li>
+<li>有冲突可能</li>
+<li>MySQL自动管理，人为无法干预。</li>
+</ol>
+</li>
+</ul>
+<h3 id="异步-IO"><a href="#异步-IO" class="headerlink" title="异步 IO"></a>异步 IO</h3><p>采用异步 IO（Asynchronous IO，AIO）的方式来处理磁盘可以提高磁盘操作性能。</p>
+<p><strong>Sync IO vs AIO</strong><br>Sync IO 每进行一次 IO 操作，需要等待此次操作结束才能继续接下来的操作；AIO 可以在发出一个 IO 请求后立即在发出另一个 IO 请求，当全部 IO 请求发送完毕后，等待所有 IO 操作的完成。</p>
+<p><strong>IO merge</strong><br>将多个 IO 合并为一个 IO，以提高 IOPS 性能。<br>例子：用户需要访问页的（space, page_no）为：(8，6)、(8，7)、(8，8)。每页大小为16K，如果使用同步 IO 需要进行3次 IO 操作；而AIO 会判断这三个页是连续的，因此 AIO 底层会发送一个 IO 请求，从（8，6）开始读 48K 的页</p>
+<p><strong>刷新邻接页</strong><br>当刷新一个脏页时，innodb存储引擎会检测该页所在区(extent)的所有页，如果是脏页，那么一起进行刷新。这样做的好处显而易见，通过AIO可以将多个IO写入操作合并为一个IO操作，增大写入量，减少了物理写IO，故该工作机制在传统机械磁盘下有着显著的优势。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/29/Redis%E7%8B%AC%E7%AB%8B%E5%8A%9F%E8%83%BD%E5%AE%9E%E7%8E%B0/" rel="prev" title="Redis独立功能实现">
+      <i class="fa fa-chevron-left"></i> Redis独立功能实现
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/03/29/InnoDB%E7%B4%A2%E5%BC%95%E4%B8%8E%E7%AE%97%E6%B3%95/" rel="next" title="InnoDB索引与算法">
+      InnoDB索引与算法 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#InnoDB存储引擎"><span class="nav-number">1.</span> <span class="nav-text">InnoDB存储引擎</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#InnoDB体系架构"><span class="nav-number">1.1.</span> <span class="nav-text">InnoDB体系架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#后台线程"><span class="nav-number">1.1.1.</span> <span class="nav-text">后台线程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#内存"><span class="nav-number">1.1.2.</span> <span class="nav-text">内存</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#缓冲池"><span class="nav-number">1.1.2.1.</span> <span class="nav-text">缓冲池</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#重做日志缓冲、额外的内存池"><span class="nav-number">1.1.2.2.</span> <span class="nav-text">重做日志缓冲、额外的内存池</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Checkpoint-技术"><span class="nav-number">1.1.3.</span> <span class="nav-text">Checkpoint 技术</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#InnoDB关键特性"><span class="nav-number">1.1.4.</span> <span class="nav-text">InnoDB关键特性</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#插入缓冲"><span class="nav-number">1.1.4.1.</span> <span class="nav-text">插入缓冲</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#两次写"><span class="nav-number">1.1.5.</span> <span class="nav-text">两次写</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#自适应哈希索引"><span class="nav-number">1.1.6.</span> <span class="nav-text">自适应哈希索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#异步-IO"><span class="nav-number">1.1.7.</span> <span class="nav-text">异步 IO</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.7.1
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

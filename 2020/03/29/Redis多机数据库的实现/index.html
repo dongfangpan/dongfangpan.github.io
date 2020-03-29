@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://yoursite.com').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.7.1',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="多机数据库的实现复制用户通过执行 SLAVEOF 命令或设置 slaveof 选项进行复制。被复制服务器为主服务器，对主服务器进行复制的服务器为从服务器。 旧版主从复制过程  从服务器发送 SYNC 命令 主服务器接收到 SYNC 命令，执行 BGSAVE 命令，后台生成 RDB 文件和缓冲区用于存贮在复制过程中执行的命令 BGSAVE 命令完成后，主服务器向从服务器发送 RDB 文件，从服务器载">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis多机数据库的实现">
+<meta property="og:url" content="http://yoursite.com/2020/03/29/Redis%E5%A4%9A%E6%9C%BA%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AE%9E%E7%8E%B0/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="多机数据库的实现复制用户通过执行 SLAVEOF 命令或设置 slaveof 选项进行复制。被复制服务器为主服务器，对主服务器进行复制的服务器为从服务器。 旧版主从复制过程  从服务器发送 SYNC 命令 主服务器接收到 SYNC 命令，执行 BGSAVE 命令，后台生成 RDB 文件和缓冲区用于存贮在复制过程中执行的命令 BGSAVE 命令完成后，主服务器向从服务器发送 RDB 文件，从服务器载">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006tNbRwgy1gbelypepsdj30gk07o0u0.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006tNbRwgy1gbenbyiiqoj30zw0dsagg.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006tNbRwgy1gbencrm06nj30pw0lajvp.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006tNbRwgy1gbfq7bv68hj31210u0n9i.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006tNbRwgy1gbfsfdi3bej31hq08ewic.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006tNbRwgy1gbfshpcxamj30n008e0ug.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006tNbRwgy1gbfsmbky3zj30l20640ts.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006tNbRwgy1gbftvw0ozxj30xm044jsg.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006tNbRwgy1gbfty5ijrlj30dq08yjsk.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006tNbRwgy1gbfudd8ogrj30oo0q0adj.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006tNbRwgy1gbgwutggd9j30r00fkjup.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006tNbRwgy1gbgygkem90j31a60ic7aa.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006tNbRwgy1gbgzdq4u7oj30o40ck77c.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006tNbRwgy1gbgzh3dyoqj30nq0e841q.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006tNbRwgy1gbh071bedbj318m0fqdm8.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006tNbRwgy1gbh0dr2qpaj30tu0xon1b.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006tNbRwgy1gbh6rhjb7fj30u00wtk0a.jpg">
+<meta property="article:published_time" content="2020-03-29T12:38:20.504Z">
+<meta property="article:modified_time" content="2020-03-29T12:38:22.436Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tva1.sinaimg.cn/large/006tNbRwgy1gbelypepsdj30gk07o0u0.jpg">
+
+<link rel="canonical" href="http://yoursite.com/2020/03/29/Redis%E5%A4%9A%E6%9C%BA%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AE%9E%E7%8E%B0/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>Redis多机数据库的实现 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/29/Redis%E5%A4%9A%E6%9C%BA%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AE%9E%E7%8E%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Redis多机数据库的实现
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2020-03-29 20:38:20 / Modified: 20:38:22" itemprop="dateCreated datePublished" datetime="2020-03-29T20:38:20+08:00">2020-03-29</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="多机数据库的实现"><a href="#多机数据库的实现" class="headerlink" title="多机数据库的实现"></a>多机数据库的实现</h1><h2 id="复制"><a href="#复制" class="headerlink" title="复制"></a>复制</h2><p>用户通过执行 SLAVEOF 命令或设置 slaveof 选项进行复制。<br>被复制服务器为主服务器，对主服务器进行复制的服务器为从服务器。</p>
+<p><strong>旧版主从复制过程</strong></p>
+<ol>
+<li>从服务器发送 SYNC 命令</li>
+<li>主服务器接收到 SYNC 命令，执行 BGSAVE 命令，后台生成 RDB 文件和缓冲区用于存贮在复制过程中执行的命令</li>
+<li>BGSAVE 命令完成后，主服务器向从服务器发送 RDB 文件，从服务器载入 RDB 文件并恢复数据库状态</li>
+<li>主服务器向从服务器发送缓存区保存的写命令，从服务器执行这些命令</li>
+<li>主服务器对从服务器执行命令传播操作<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbelypepsdj30gk07o0u0.jpg" alt="img"></li>
+</ol>
+<p><strong>为什么要改进旧版主从复制过程中的断线就完整同步的操作：</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbenbyiiqoj30zw0dsagg.jpg" alt="img"></p>
+<p><strong>新版主从复制改进</strong><br>使用 PSYNC 替代 SYNC，具有完整重同步和部分重同步两种模式。<br>完整重同步用于首次复制情况，和旧版的一样。<br>部分重同步摒弃了旧版复制功能在断线重连之后需要重新全部同步的缺陷，在断线重连之后只需要同步之前没同步的那些命令就行了。</p>
+<p><strong>部分重同步功能的构成：</strong></p>
+<ol>
+<li>主从服务器的复制偏移量 - 主从服务器偏移量不一致则进行重同步。</li>
+<li>主服务器的复制积压缓冲区 - 缓冲区是一个固定长度先进先出的队列，如果偏移量在缓冲区里面则进行部分重同步操作，否则进行完整重同步操作</li>
+<li>运行ID - 从服务器保存的运行ID和当前连接的主服务器运行ID相同则进行部分重同步操作，否则进行完整重同步操作。</li>
+</ol>
+<p><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbencrm06nj30pw0lajvp.jpg" alt="img"></p>
+<p><strong>心跳检测</strong><br>在命令传播阶段，从服务器默认每秒一次向主服务器发送命令<code>REPLCONF ACK</code>。该命令有3个作用：</p>
+<ol>
+<li>检测主服务器的网络连接状态，lag 值超过一秒证明主从服务器连接故障。</li>
+<li>辅助实现 min-slaves 配置选项</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">min-slaves-to-write 3</span><br><span class="line">min-slaves-max-lag 10</span><br></pre></td></tr></table></figure>
+
+<p>从服务器数量小于三个或从服务器延迟（lag）值&gt;=10秒，主服务器将拒绝执行写命令。<br>\3. 检测命令丢失 - 通过偏移量来判断命令是否丢失（和部分重同步类似，一个在没有断线时执行，一个在断线时执行）</p>
+<h2 id="Sentinel-哨兵"><a href="#Sentinel-哨兵" class="headerlink" title="Sentinel 哨兵"></a>Sentinel 哨兵</h2><p>Sentinel的故障转移功能<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbfq7bv68hj31210u0n9i.jpg" alt="img"></p>
+<h2 id="集群"><a href="#集群" class="headerlink" title="集群"></a>集群</h2><p>集群通过分片（sharding）来进行数据贡献，并提供复制和故障转移功能。</p>
+<h4 id="节点-node"><a href="#节点-node" class="headerlink" title="节点 node"></a>节点 node</h4><p>节点是运行在集群模式下的 Redis 服务器<br>一个 Redis 集群通常由多个节点（node）组成，一开始每个节点都是独立的，各个独立的节点连接起来构成一个多节点集群。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbfsfdi3bej31hq08ewic.jpg" alt="img"></p>
+<p><strong>节点启动</strong><br>节点会继续使用所有在单机模式下使用的服务器组建，如时间处理器，事件处理器，RDB AOF 持久化模块等。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbfshpcxamj30n008e0ug.jpg" alt="img"></p>
+<p><strong>节点的握手过程</strong></p>
+<ol>
+<li>节点 A 为节点 B 创建一个 clusterNode 结构，并将该结构添加到自己的 clusterState.nodes 字典里</li>
+<li>节点 A 发送 MEET 命令给节点 B</li>
+<li>节点 B 接收到 MEET 命令，为节点 A 创建一个 clusterNode 结构，将该结构添加到自己的 clusterState.nodes 字典里</li>
+<li>节点 B 向节点 A 发送 PONG 消息</li>
+<li>节点 A 接收到 PONG 消息，向节点 B 发送 PING 消息<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbfsmbky3zj30l20640ts.jpg" alt="img"></li>
+</ol>
+<h4 id="指派槽-slot"><a href="#指派槽-slot" class="headerlink" title="指派槽 slot"></a>指派槽 slot</h4><p>集群的整个数据库被分为 16384（214214）个槽，数据库中的每个键都属于着 16384 个槽的其中一个，集群中的每个节点可以处理 0～16384 个槽。<br>如果 16384 个槽都有节点在处理，集群处于上线状态（ok），否则，只要有一个槽没有节点处理，集群就处于下线状态（fail）。</p>
+<p><strong>记录节点的槽指派信息</strong><br><em>取出、设置slots数组的任意一个二进制位的值的复杂度为O(1)</em></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">clusterNode</span> &#123;</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// 长度为2048个字节的二进制数组</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">char</span> slots[<span class="number">16384</span>/<span class="number">8</span>]</span><br><span class="line">    <span class="comment">// 该节点负责处理的槽数量</span></span><br><span class="line">    <span class="keyword">int</span> numslots;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>Redis 根据索引 i 上的二进制位的值来判断节点是否负责处理槽 i：</strong></p>
+<ul>
+<li>如果 slots 数组在索引 i 上的二进制位的值为1，那么表示节点负责处理槽 i。</li>
+<li>如果 slots 数组在索引 i 上的二进制位的值为0，那么表示节点不负责处理槽 i。</li>
+</ul>
+<p><strong>节点负责处理槽1、3、5、8、9、10的例子</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbftvw0ozxj30xm044jsg.jpg" alt="img"></p>
+<p><strong>传播节点槽指派信息</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbfty5ijrlj30dq08yjsk.jpg" alt="img"></p>
+<p><strong>记录集群所有槽的指派信息</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">clusterState</span> &#123;</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// slots数组包含16834个项，每个数组项都是一个指向clusterNode结构的指针</span></span><br><span class="line">    clusterNode *slots[<span class="number">16384</span>]</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过将所有槽的指派信息保存在 clusterState.solts 数组里，程序要检查槽 i 是否被指派，又或者取得负责处理槽 i 的节点，只需要访问 clusterState.solts[i] 的值即可，复杂度为O(1)。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbfudd8ogrj30oo0q0adj.jpg" alt="img"></p>
+<h4 id="在集群中执行命令"><a href="#在集群中执行命令" class="headerlink" title="在集群中执行命令"></a>在集群中执行命令</h4><p>当客户端向节点发送与数据库有关的命令时，接收命令的节点会计算出要处理的数据属于哪个槽：<br>如果所在槽指派给了当前节点，节点直接执行命令；反之节点会向客户端返回一个 MOVED 错误 (在集群模式下不会打印 MOVED 错误)，指引客户端转向正确的节点，并再次发送之前要执行的命令。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbgwutggd9j30r00fkjup.jpg" alt="img"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:7000&gt; set msg &quot;happy new year&quot;</span><br><span class="line">-&gt; Redirected to slot [6257] located at 127.0.0.1:7001</span><br><span class="line"></span><br><span class="line">127.0.0.1:7001&gt; get msg</span><br><span class="line">&quot;happy new year&quot;</span><br></pre></td></tr></table></figure>
+
+<p>节点将键值对保存在数据库里面，用 clusterState 结构中的 slots_to_keys 跳跃表保存槽和键的关系。（节点的分值是一个槽号，节点的成员是一个数据库键）</p>
+<h4 id="重新分片"><a href="#重新分片" class="headerlink" title="重新分片"></a>重新分片</h4><p>Redis 集群重新分片操作可以将任意数量的源节点的槽改为指派给目标节点，槽所属的键值对也会移动到目标节点上。重新分片操作可以在线进行，集群不需要下线。<br><strong>重新分片的过程</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbgygkem90j31a60ic7aa.jpg" alt="img"></p>
+<h4 id="ASK-错误"><a href="#ASK-错误" class="headerlink" title="ASK 错误"></a>ASK 错误</h4><p><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbgzdq4u7oj30o40ck77c.jpg" alt="img"><br><strong>ASK 错误和 MOVED 错误区别</strong><br>MOVED 错误表示槽的负责权已经从一个节点转移到了另一个节点，而 ASK 作物知识两个节点在迁移槽的过程中使用的一种临时措施。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbgzh3dyoqj30nq0e841q.jpg" alt="img"></p>
+<h4 id="复制与故障转移"><a href="#复制与故障转移" class="headerlink" title="复制与故障转移"></a>复制与故障转移</h4><p>Redis 集群中的节点分为主节点 master 和从节点 slave，其中主节点用于处理槽，从节点用于复制主节点，在主节点下线时代替下线节点处理槽。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbh071bedbj318m0fqdm8.jpg" alt="img"></p>
+<p><strong>主从节点的结构</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbh0dr2qpaj30tu0xon1b.jpg" alt="img"></p>
+<p><strong>故障检测</strong></p>
+<ol>
+<li>集群中每一个主节点都会定期向集群中的其他主节点发送 PING 消息，其他节点收到消息会返回一个 PONG 消息。</li>
+<li>当一个节点发送 PING 之后的一定时间内未收到 PONG 消息，则把接收节点 x 标记为疑似下线节点。</li>
+<li>当超过半数的主节点都把 x 节点标记为疑似下线节点，则 x 节点会被标记为下线。</li>
+<li>x 节点的其中一个从节点会竞选成为新的主节点（每个主节点都有投票权，当超过半数的主节点吧支持票投给其中一个从节点，那这个从节点就被选举为新的主节点）</li>
+</ol>
+<h4 id="消息"><a href="#消息" class="headerlink" title="消息"></a>消息</h4><p>集群中的节点通过发送和接收消息来进行通信，常见的消息包括 MEET、PING、PONG、PUBLISH、FAIL 五种。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbh6rhjb7fj30u00wtk0a.jpg" alt="img"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/29/Redis%E5%8D%95%E6%9C%BA%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AE%9E%E7%8E%B0/" rel="prev" title="Redis单机数据库的实现">
+      <i class="fa fa-chevron-left"></i> Redis单机数据库的实现
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/03/29/Redis%E7%8B%AC%E7%AB%8B%E5%8A%9F%E8%83%BD%E5%AE%9E%E7%8E%B0/" rel="next" title="Redis独立功能实现">
+      Redis独立功能实现 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#多机数据库的实现"><span class="nav-number">1.</span> <span class="nav-text">多机数据库的实现</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#复制"><span class="nav-number">1.1.</span> <span class="nav-text">复制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sentinel-哨兵"><span class="nav-number">1.2.</span> <span class="nav-text">Sentinel 哨兵</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#集群"><span class="nav-number">1.3.</span> <span class="nav-text">集群</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#节点-node"><span class="nav-number">1.3.0.1.</span> <span class="nav-text">节点 node</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#指派槽-slot"><span class="nav-number">1.3.0.2.</span> <span class="nav-text">指派槽 slot</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#在集群中执行命令"><span class="nav-number">1.3.0.3.</span> <span class="nav-text">在集群中执行命令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#重新分片"><span class="nav-number">1.3.0.4.</span> <span class="nav-text">重新分片</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ASK-错误"><span class="nav-number">1.3.0.5.</span> <span class="nav-text">ASK 错误</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#复制与故障转移"><span class="nav-number">1.3.0.6.</span> <span class="nav-text">复制与故障转移</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#消息"><span class="nav-number">1.3.0.7.</span> <span class="nav-text">消息</span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.7.1
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

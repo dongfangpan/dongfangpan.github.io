@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://yoursite.com').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.7.1',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="索引与算法B+ 树B+ 数的插入操作    Leaf Page满 Index Page满 操作    NO No 直接将记录插入到叶子节点   Yes No 1. 拆分Leaf Page； 2. 将中间的节点放入到Index Page中；3. 小于中间节点的记录放左边； 4. 大于或等于中间节点的记录放右边   Yes Yes 1. 拆分Leaf Page；2. 小于中间节点的记录放左边；3. 大">
+<meta property="og:type" content="article">
+<meta property="og:title" content="InnoDB索引与算法">
+<meta property="og:url" content="http://yoursite.com/2020/03/29/InnoDB%E7%B4%A2%E5%BC%95%E4%B8%8E%E7%AE%97%E6%B3%95/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="索引与算法B+ 树B+ 数的插入操作    Leaf Page满 Index Page满 操作    NO No 直接将记录插入到叶子节点   Yes No 1. 拆分Leaf Page； 2. 将中间的节点放入到Index Page中；3. 小于中间节点的记录放左边； 4. 大于或等于中间节点的记录放右边   Yes Yes 1. 拆分Leaf Page；2. 小于中间节点的记录放左边；3. 大">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/0082zybpgy1gbw12kppi6j31880medmo.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/0082zybpgy1gbw940ixz5j30pq08e0ud.jpg">
+<meta property="article:published_time" content="2020-03-29T12:40:50.555Z">
+<meta property="article:modified_time" content="2020-03-29T12:40:50.555Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tva1.sinaimg.cn/large/0082zybpgy1gbw12kppi6j31880medmo.jpg">
+
+<link rel="canonical" href="http://yoursite.com/2020/03/29/InnoDB%E7%B4%A2%E5%BC%95%E4%B8%8E%E7%AE%97%E6%B3%95/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>InnoDB索引与算法 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/29/InnoDB%E7%B4%A2%E5%BC%95%E4%B8%8E%E7%AE%97%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          InnoDB索引与算法
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-03-29 20:40:50" itemprop="dateCreated datePublished" datetime="2020-03-29T20:40:50+08:00">2020-03-29</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="索引与算法"><a href="#索引与算法" class="headerlink" title="索引与算法"></a>索引与算法</h1><h2 id="B-树"><a href="#B-树" class="headerlink" title="B+ 树"></a>B+ 树</h2><p><strong>B+ 数的插入操作</strong></p>
+<table>
+<thead>
+<tr>
+<th>Leaf Page满</th>
+<th>Index Page满</th>
+<th>操作</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>NO</td>
+<td>No</td>
+<td>直接将记录插入到叶子节点</td>
+</tr>
+<tr>
+<td>Yes</td>
+<td>No</td>
+<td>1. 拆分Leaf Page； 2. 将中间的节点放入到Index Page中；3. 小于中间节点的记录放左边； 4. 大于或等于中间节点的记录放右边</td>
+</tr>
+<tr>
+<td>Yes</td>
+<td>Yes</td>
+<td>1. 拆分Leaf Page；2. 小于中间节点的记录放左边；3. 大于或等于中间节点的记录放右边；4.拆分Index Page；5. 小于中间节点的记录放左边；6. 大于中间节点的记录放右边；7. 中间节点放入上一层Index Page</td>
+</tr>
+</tbody></table>
+<p><strong>应对页拆分策略</strong><br>但是为了保持平衡对于新插入的键值可能需要做大量的拆分页（split）操作。因为B+树结构主要用于磁盘，页的拆分意味着磁盘的操作，所以应该在可能的情况下尽量减少页的拆分操作。因此，B+树同样提供了类似于平衡二叉树的旋转功能。(旋转发生在Leaf Page已经满，但是其的左右兄弟节点没有满的情况下。这时B+树并不会急于去做拆分页的操作，而是将记录移到所有页的兄弟节点上。在通常情况下，左兄弟会被首先检查用来做旋转操作。)</p>
+<p><strong>B+ 数的删除操作</strong><br>B+树使用填充因子（fill factor）来控制树的删除变化，50%是填充因子可设的最小值。</p>
+<table>
+<thead>
+<tr>
+<th>叶子节点小于填充因子</th>
+<th>中间节点小于填充因子</th>
+<th>操作</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>No</td>
+<td>No</td>
+<td>直接将记录从叶子节点删除，如果该节点还是Index Page的节点，用该节点的右节点代替</td>
+</tr>
+<tr>
+<td>Yes</td>
+<td>No</td>
+<td>合并叶子结点和它的兄弟节点，同时更新Index Page</td>
+</tr>
+<tr>
+<td>Yes</td>
+<td>Yes</td>
+<td>1. 合并叶子节点和它的兄弟节点 2. 更新Index Page 3. 合并Index Page和它的兄弟节点</td>
+</tr>
+</tbody></table>
+<h2 id="B-树索引"><a href="#B-树索引" class="headerlink" title="B+ 树索引"></a>B+ 树索引</h2><p><strong>B+ 树索引并不能找到一个给定键值的具体行，B+ 树索引能找到的只是被查找数据行所在的页。然后数据库通过把页读到内存，再在内存中进行查找，最后得到要查找的数据。</strong></p>
+<p><strong>聚簇索引</strong><br>在聚簇索引中寻找数据：</p>
+<ol>
+<li>在非叶子节点中找出主键所在数据页，在数据页中找到主键位置</li>
+<li>根据主键（Key）算出指向数据页的页号（Pointer）</li>
+<li>根据 Pointer 在叶子节点上找到对应的页</li>
+<li>在对应的页中找到主键对应的位置（页里面是按照主键顺序排列的双向链表）</li>
+<li>返回主键对应的数据信息</li>
+</ol>
+<p><img src="https://tva1.sinaimg.cn/large/0082zybpgy1gbw12kppi6j31880medmo.jpg" alt="img"></p>
+<h3 id="B-数索引管理"><a href="#B-数索引管理" class="headerlink" title="B+ 数索引管理"></a>B+ 数索引管理</h3><p><strong>MySQL 5.5版本之前的添加或删除索引操作：</strong></p>
+<ol>
+<li>首先创建一张新的临时表，表结构为通过命令ALTER TABLE新定义的结构。</li>
+<li>然后把原表中数据导入到临时表。</li>
+<li>接着删除原表。</li>
+<li>最后把临时表重名为原来的表名。</li>
+</ol>
+<p><strong>MySQL 5.5版本（InnoDB 1.0.x版本）</strong></p>
+<p><strong>Fast Index Creation（快速索引创建 FIC）</strong><br>对于辅助索引的创建，InnoDB存储引擎会对创建索引的表加上一个S锁。在创建的过程中，不需要重建表，因此速度较之前提高很多，并且数据库的可用性也得到了提高。删除辅助索引操作就更简单了，InnoDB存储引擎只需更新内部视图，并将辅助索引的空间标记为可用，同时删除MySQL数据库内部视图上对该表的索引定义即可。</p>
+<p><strong>FIC缺陷</strong></p>
+<ol>
+<li>由于FIC在索引的创建的过程中对表加上了S锁，因此在创建的过程中只能对该表进行读操作，若有大量的事务需要对目标表进行写操作，那么数据库的服务同样不可用。</li>
+<li>只限于辅助索引使用。</li>
+</ol>
+<p><strong>MySQL 5.6版本</strong></p>
+<p><strong>可以*在线*（边执行DML操作边执行DDL操作）DDL操作的有：</strong></p>
+<ol>
+<li>辅助索引的创建与删除</li>
+<li>改变自增长值</li>
+<li>添加或删除外键约束</li>
+<li>列的重命名</li>
+</ol>
+<p><strong>原理</strong><br>InnoDB实现Online DDL的原理是在执行创建或者删除操作的同时，将INSERT、UPDATE、DELETE这类DML操作日志写入到一个缓存中。待完成索引创建后再将重做应用到表上，以此达到数据的一致性。</p>
+<h2 id="Cardinality-值"><a href="#Cardinality-值" class="headerlink" title="Cardinality 值"></a>Cardinality 值</h2><p>show index 示例</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show index from t&#x2F;G</span><br><span class="line">****************** 1. row ******************</span><br><span class="line">Table: t</span><br><span class="line">...</span><br><span class="line">Cardinality: 2</span><br><span class="line">...</span><br><span class="line">Comment:</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Cardinality 表示索引中不重复记录数量的<strong>预估值</strong>。</li>
+<li>Cardinality / n_rows_in_table 应尽可能接近 1。（表示有高区分度）</li>
+<li>更新 Cardinality 信息的策略<ul>
+<li>表中1/16的数据已发生过变化。</li>
+<li>stat_modified_counter &gt; 2,000,000,000</li>
+</ul>
+</li>
+<li>Cardinality 信息的统计和更新操作<ul>
+<li>取得 B+ 树索引页中叶子节点的数量，记为 A。</li>
+<li>随机取得B+树索引中的8个叶子节点。统计每个页不同记录的个数，即为 P1, P2, …, P8。</li>
+<li>根据采样信息给出 Cardinality 的预估值：Cardinality =（P1+P2+…+P8） * A/8。</li>
+</ul>
+</li>
+<li>因为 Cardinality 值是通过<strong>随机</strong>8个叶子节点预估得来，不是一个精确的值，所以每次得到的 Cardinality 值可能不同。</li>
+<li>重新计算索引的 Cardinality 值操作<ul>
+<li>执行SQL语句 ANALYZE TABLE、SHOW TABLE STATUS、SHOW INDEX</li>
+<li>访问 INFORMATION_SCHEMA 架构下的表 TABLES 和 STATISTICS</li>
+</ul>
+</li>
+</ul>
+<h2 id="B-树索引的使用"><a href="#B-树索引的使用" class="headerlink" title="B+ 树索引的使用"></a>B+ 树索引的使用</h2><h3 id="联合索引"><a href="#联合索引" class="headerlink" title="联合索引"></a>联合索引</h3><p>联合索引本质上也是一棵 B+ 树，如图，索引 (a, b) 的叶子节点会保证在 a 的顺序的前提下保证 b 的顺序。所以，对于单个的 a 查询是可以走 (a, b) 索引的，但是单个 b 查询不行。<br><img src="https://tva1.sinaimg.cn/large/0082zybpgy1gbw940ixz5j30pq08e0ud.jpg" alt="img"><br>同时，联合索引的第二个键值也是进行了排序处理的。</p>
+<h3 id="覆盖索引"><a href="#覆盖索引" class="headerlink" title="覆盖索引"></a>覆盖索引</h3><p>覆盖索引就是从辅助索引中就可以得到查询记录。好处就是不需要再去聚集索引中查找整行的数据，可以减少IO操作。<br>注意：执行以下操作是可以使用覆盖索引 (userid, buy_date) 的：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select count(*) from buy_log where buy_date&gt;&#39;2011-01-01&#39; and buy_date&lt;&#39;2011-12-01&#39;;</span><br></pre></td></tr></table></figure>
+
+<p>这里只用到了 buy_date 进行查询，但是因为是统计操作，所以可以用到覆盖索引。</p>
+<h3 id="优化器选择不使用索引的情况"><a href="#优化器选择不使用索引的情况" class="headerlink" title="优化器选择不使用索引的情况"></a>优化器选择不使用索引的情况</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select count(*) from order_details where orderid&gt;1000 and orderid&lt;10000;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>客户需要查询整行数据，如果使用orderid作为索引不能覆盖所有信息，所以在使用二级索引orderid查询出主键之后，还是需要在聚集索引中根据主键查找整行数据。</li>
+<li>如果要求访问的数据流很小，则优化器还是会选择辅助索引，但是当访问的数据占整个表中数据的蛮大一部分时(一般为20%左右)，优化器会通过聚集索引来查找数据。（原因是顺序读要远远快于离散读）</li>
+</ul>
+<h3 id="MRR-优化-amp-ICP-优化"><a href="#MRR-优化-amp-ICP-优化" class="headerlink" title="MRR 优化 &amp; ICP 优化"></a>MRR 优化 &amp; ICP 优化</h3><p>MMR 和 ICP 都是MySQL 5.6 开始支持的索引优化方式。</p>
+<p><strong>MMR（Multi-Range Read）适用于 range、ref、eq_ref类型查询，好处是：</strong></p>
+<ol>
+<li>MRR 是数据访问变得较为顺序</li>
+<li>减少缓冲池中页被替换次数</li>
+<li>批量处理对键值的查询操作</li>
+</ol>
+<p><strong>ICP（Index Condition Pushdown）原理：</strong><br>支持 ICP 之后，MySQL 数据库会在取出索引的同时，判断是否可以进行 WHERE 条件的过滤，也就是将 WHERE 的部分过滤操作放在了储存引擎层。<br>例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">select * from people</span><br><span class="line">    where zopcode &#x3D; &#39;311300&#39;</span><br><span class="line">    and lastname like &#39;%truni%&#39;</span><br><span class="line">    and address like &#39;%Main street%&#39;;</span><br></pre></td></tr></table></figure>
+
+<p>对于上述语句，若不支持 ICP 优化，数据库需要先通过索引取出所有 zipcode 等于 311300 的记录，然后再过滤 where 之后的 2 个条件。若支持 ICP 优化，数据库可以在索引取出时，就进行 where 条件的过滤，然后去获取记录。</p>
+<h2 id="全文检索"><a href="#全文检索" class="headerlink" title="全文检索"></a>全文检索</h2><p>对于以下语句，B+树索引是可以通过前缀索引进行查找的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from blog where content like &#39;xxx%&#39;;</span><br></pre></td></tr></table></figure>
+
+<p>但是在更多情况下用户需要查询的内容是包含某单词的，如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from blog where content like &#39;%xxx%&#39;;</span><br></pre></td></tr></table></figure>
+
+<p>这样的查询B+树索引就不能很好的完成工作。</p>
+<p>全文检索是将储存于数据库中的整本书或整篇文章中的任意内容信息查找出来的技术。InnoDB 1.2.x 版本开始，InnoDB 开始支持全文检索。</p>
+<h3 id="倒排索引"><a href="#倒排索引" class="headerlink" title="倒排索引"></a>倒排索引</h3><p>倒排索引和B+树索引一样，也是一种索引结构。它在辅助表中储存了单词和单词自身在一个或多个文档中所在的位置之间的映射。有2种表现形式：</p>
+<ol>
+<li>inverted file index，表现形式为{单词，单词所在的文档ID}</li>
+<li>full inverted index，表现形式为{单词，(单词所在的文档ID，具体在文档中的位置)}<br>例子：</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">具体实例，假设有三个文档</span><br><span class="line">T0 &#x3D; &quot;it is what it is&quot;</span><br><span class="line">T1 &#x3D; &quot;what is it&quot;</span><br><span class="line">T2 &#x3D; &quot;it is a banana&quot;</span><br><span class="line">采用inverted file index方式结果</span><br><span class="line">&quot;a&quot;:      &#123;2&#125;</span><br><span class="line">&quot;banana&quot;: &#123;2&#125;</span><br><span class="line">&quot;is&quot;:     &#123;0, 1, 2&#125;</span><br><span class="line">&quot;it&quot;:     &#123;0, 1, 2&#125;</span><br><span class="line">&quot;what&quot;:   &#123;0, 1&#125;</span><br><span class="line">采用full inverted index方式结果</span><br><span class="line">&quot;a&quot;:      &#123;(2, 2)&#125;</span><br><span class="line">&quot;banana&quot;: &#123;(2, 3)&#125;</span><br><span class="line">&quot;is&quot;:     &#123;(0, 1), (0, 4), (1, 1), (2, 1)&#125;</span><br><span class="line">&quot;it&quot;:     &#123;(0, 0), (0, 3), (1, 2), (2, 0)&#125;</span><br><span class="line">&quot;what&quot;:   &#123;(0, 2), (1, 0)&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>InnoDB 支持的全文检索技术采用的就是 full inverted index 方式</strong></p>
+<p><strong>全文检索常用函数</strong></p>
+<ol>
+<li>Natural Language</li>
+<li>Boolean</li>
+<li>Query Expansion</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/29/InnoDB%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/" rel="prev" title="InnoDB存储引擎">
+      <i class="fa fa-chevron-left"></i> InnoDB存储引擎
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/03/29/InnoDB%E9%94%81/" rel="next" title="InnoDB锁">
+      InnoDB锁 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#索引与算法"><span class="nav-number">1.</span> <span class="nav-text">索引与算法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#B-树"><span class="nav-number">1.1.</span> <span class="nav-text">B+ 树</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#B-树索引"><span class="nav-number">1.2.</span> <span class="nav-text">B+ 树索引</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#B-数索引管理"><span class="nav-number">1.2.1.</span> <span class="nav-text">B+ 数索引管理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cardinality-值"><span class="nav-number">1.3.</span> <span class="nav-text">Cardinality 值</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#B-树索引的使用"><span class="nav-number">1.4.</span> <span class="nav-text">B+ 树索引的使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#联合索引"><span class="nav-number">1.4.1.</span> <span class="nav-text">联合索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#覆盖索引"><span class="nav-number">1.4.2.</span> <span class="nav-text">覆盖索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#优化器选择不使用索引的情况"><span class="nav-number">1.4.3.</span> <span class="nav-text">优化器选择不使用索引的情况</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MRR-优化-amp-ICP-优化"><span class="nav-number">1.4.4.</span> <span class="nav-text">MRR 优化 &amp; ICP 优化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#全文检索"><span class="nav-number">1.5.</span> <span class="nav-text">全文检索</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#倒排索引"><span class="nav-number">1.5.1.</span> <span class="nav-text">倒排索引</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.7.1
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

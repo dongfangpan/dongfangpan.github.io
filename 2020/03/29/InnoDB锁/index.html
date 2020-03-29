@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://yoursite.com').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.7.1',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="锁InnoDB存储引擎提供一致性的非锁定读、行级锁支持。行级锁没有相关额外的开销，并可以同时得到并发性和一致性。且InnoDB不需要锁升级，因为一个锁和多个锁开销是一样的。 InnoDB锁锁的类型InnoDB实现了两种标准行级锁：  共享锁（S Lock），允许事务读一行数据。 排他锁（X Lock），允许事务修改或删除一行数据。      X S    X 不兼容 不兼容   S 不兼容 兼容">
+<meta property="og:type" content="article">
+<meta property="og:title" content="InnoDB锁">
+<meta property="og:url" content="http://yoursite.com/2020/03/29/InnoDB%E9%94%81/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="锁InnoDB存储引擎提供一致性的非锁定读、行级锁支持。行级锁没有相关额外的开销，并可以同时得到并发性和一致性。且InnoDB不需要锁升级，因为一个锁和多个锁开销是一样的。 InnoDB锁锁的类型InnoDB实现了两种标准行级锁：  共享锁（S Lock），允许事务读一行数据。 排他锁（X Lock），允许事务修改或删除一行数据。      X S    X 不兼容 不兼容   S 不兼容 兼容">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/0082zybpgy1gc1v70rzy0j30f40amq4b.jpg">
+<meta property="article:published_time" content="2020-03-29T12:41:41.351Z">
+<meta property="article:modified_time" content="2020-03-29T12:41:52.377Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tva1.sinaimg.cn/large/0082zybpgy1gc1v70rzy0j30f40amq4b.jpg">
+
+<link rel="canonical" href="http://yoursite.com/2020/03/29/InnoDB%E9%94%81/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>InnoDB锁 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/29/InnoDB%E9%94%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          InnoDB锁
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2020-03-29 20:41:41 / Modified: 20:41:52" itemprop="dateCreated datePublished" datetime="2020-03-29T20:41:41+08:00">2020-03-29</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="锁"><a href="#锁" class="headerlink" title="锁"></a>锁</h1><p>InnoDB存储引擎提供一致性的非锁定读、行级锁支持。行级锁没有相关额外的开销，并可以同时得到并发性和一致性。且InnoDB不需要锁升级，因为一个锁和多个锁开销是一样的。</p>
+<h2 id="InnoDB锁"><a href="#InnoDB锁" class="headerlink" title="InnoDB锁"></a>InnoDB锁</h2><h3 id="锁的类型"><a href="#锁的类型" class="headerlink" title="锁的类型"></a>锁的类型</h3><p><strong>InnoDB实现了两种标准行级锁：</strong></p>
+<ol>
+<li>共享锁（S Lock），允许事务读一行数据。</li>
+<li>排他锁（X Lock），允许事务修改或删除一行数据。</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>X</th>
+<th>S</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>X</td>
+<td>不兼容</td>
+<td>不兼容</td>
+</tr>
+<tr>
+<td>S</td>
+<td>不兼容</td>
+<td>兼容</td>
+</tr>
+</tbody></table>
+<h3 id="一致性非锁定读"><a href="#一致性非锁定读" class="headerlink" title="一致性非锁定读"></a>一致性非锁定读</h3><p>一致性的非锁定读是指 InnoDB 存储引擎通过行多版本控制的方法来读取当前执行时间数据库中行的数据。</p>
+<ul>
+<li>如果读取的行正在执行 delete 或 update 操作，这时读取操作不会因此去等待行上锁的释放。相反，InnoDB 会去读取行的快照数据。</li>
+<li>快照数据是指该行的之前版本的数据，这是通过 undo 段来完成。undo 段是用来在事务中回滚数据，因此快照数据本身没有开销，也不用上锁。</li>
+</ul>
+<p><strong>READ COMMITTED 和 REPEATABLE READ 一致性非锁定读区别</strong><br>READ COMMITTED：读取被锁定行的最新一份快照数据。<br>REPEATABLE READ：读取事务开始时的行数据版本。<br>例子：</p>
+<table>
+<thead>
+<tr>
+<th>时间</th>
+<th>会话A</th>
+<th>会话B</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>begin</td>
+<td></td>
+</tr>
+<tr>
+<td>2</td>
+<td>select * from parent where id = 1;</td>
+<td></td>
+</tr>
+<tr>
+<td>3</td>
+<td></td>
+<td>begin</td>
+</tr>
+<tr>
+<td>4</td>
+<td></td>
+<td>update parent set id=3 where id=1;</td>
+</tr>
+<tr>
+<td>5</td>
+<td>select * from parent where id = 1;</td>
+<td></td>
+</tr>
+<tr>
+<td>6</td>
+<td></td>
+<td>commit</td>
+</tr>
+<tr>
+<td>7</td>
+<td>select * from parent where id = 1;</td>
+<td></td>
+</tr>
+<tr>
+<td>8</td>
+<td>commit</td>
+<td></td>
+</tr>
+</tbody></table>
+<p>在第五步的时候，若使用 READ COMMITTED 会返回一个 empty set；若用 REPEATABLE READ 则还是返回id=1的行。</p>
+<h3 id="一致性锁定读"><a href="#一致性锁定读" class="headerlink" title="一致性锁定读"></a>一致性锁定读</h3><p><strong>支持一致性锁定读的操作：</strong></p>
+<ol>
+<li>select … for update：对读取的行记录加一个 X 锁，其他事务不能对已锁定的行加上任何锁。</li>
+<li>select … lock in share mode：对读取的行记录加一个 S 锁，其他事务可以对该行加 S 锁，但不能加 X 锁。</li>
+</ol>
+<p>select … for update、select … lock in share mode 必须在一个事务中，当事务提交了，锁也就释放了。</p>
+<h3 id="锁的算法"><a href="#锁的算法" class="headerlink" title="锁的算法"></a>锁的算法</h3><p><strong>行锁的3种算法：</strong></p>
+<ul>
+<li>Record Lock：单个行记录上的锁，锁住索引记录</li>
+<li>Gap Lock：间隙锁，锁定一个范围，但不包含记录本身</li>
+<li>Next-Key Lock：Gap+Record,锁定一个范围，并且锁定记录本身</li>
+</ul>
+<p>Next-Key Lock 例子：<br>一个索引有 10、11、13、20 四个值，该索引就会被 Next-Key Lock 分为5个区间：(-∞,10]、(10,11]、(11,13]、(13,20]、(20,+∞]。</p>
+<p><strong>Next-Key Lock 降级算法</strong><br>当索引含有唯一属性时，InnoDB 会对 Next-Key Lock 进行优化，将其降级为 Record Lock，仅锁住索引本身，而不是范围。</p>
+<p><strong>辅助索引情况</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE Z (</span><br><span class="line">	a INT,</span><br><span class="line">	b INT,</span><br><span class="line">	PRIMARY KEY (a),</span><br><span class="line">	KEY (b)</span><br><span class="line">);</span><br><span class="line">INSERT INTO Z</span><br><span class="line">VALUES</span><br><span class="line">	(1, 1),</span><br><span class="line">	(3, 1),</span><br><span class="line">	(5, 3),</span><br><span class="line">	(7, 6),</span><br><span class="line">	(10, 8);</span><br></pre></td></tr></table></figure>
+
+<p>在这个表中，a 为聚集索引， b 为辅助索引。<br>执行：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM Z WHERE b&#x3D;3 FOR UPDATE;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>对于聚集索引 a，会对等于5的索引加上 Record Key</li>
+<li>对于辅助索引 b，不仅会加上一个 Next-Key Lock：(1,3)，还会对下一个键值加上 gap lock：(3,6)。</li>
+</ul>
+<h3 id="幻读"><a href="#幻读" class="headerlink" title="幻读"></a>幻读</h3><p>幻读是指在同一事务下，连续执行两次同样的SQL语句可能导致不同的结果，第二次的SQL语句可能会返回之前不存在的行<br>例子：</p>
+<table>
+<thead>
+<tr>
+<th>时间</th>
+<th>会话A</th>
+<th>会话B</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>set session tx_isolation=’read-committed’</td>
+<td></td>
+</tr>
+<tr>
+<td>2</td>
+<td>begin</td>
+<td></td>
+</tr>
+<tr>
+<td>3</td>
+<td>SELECT * FROM t WHERE a&gt; 2 FOR UPDATE; // 1 row a:5</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>4</td>
+<td></td>
+<td>begin</td>
+</tr>
+<tr>
+<td>5</td>
+<td></td>
+<td>insert into t select 4;</td>
+</tr>
+<tr>
+<td>6</td>
+<td></td>
+<td>commit</td>
+</tr>
+<tr>
+<td>7</td>
+<td>SELECT * FROM t WHERE a&gt; 2 FOR UPDATE; // 2 row a:4 a:5</td>
+<td></td>
+</tr>
+<tr>
+<td>8</td>
+<td>commit</td>
+<td></td>
+</tr>
+</tbody></table>
+<p>采用 Next-Key Lock 可以避免幻读，因为在 Next-Key Lock 模式下，SELECT * FROM t WHERE a&gt; 2 FOR UPDATE 会对（2，+∞）加上一个 X 锁。</p>
+<p><strong>所以 Next-Key Lock 可以解决幻读的问题。</strong></p>
+<h3 id="锁问题"><a href="#锁问题" class="headerlink" title="锁问题"></a>锁问题</h3><ol>
+<li>脏读<br>一个事务可以读到另外一个事务中未提交的数据。只有 read-uncommitted 模式下才会发生。</li>
+<li>不可重复读（幻读）<br>在一个事物内多次读取到同一个数据集合，但由于另一事务的修改，第一个事务两次读到的数据不一样。脏读是读为提交数据，幻读是读已经提交的数据。read-committed 模式下会发生幻读，read repeatable 可以避免幻读现象，因为采用了 Next-Key LocK。</li>
+<li>丢失更新<br>事务的更新操作会被另一个事务的更新操作所覆盖，从而导致数据不一致，避免的话需要让事务串行化，类似整个事务阶段都加锁。</li>
+</ol>
+<h3 id="死锁"><a href="#死锁" class="headerlink" title="死锁"></a>死锁</h3><p>死锁是指两个或多个事务在执行过程中，因争夺锁资源而造成的一种互相等待的现象。<br><strong>解决死锁的办法</strong></p>
+<ol>
+<li>超时：当两个事务相互等待时，当一个等待时间超过阈值，则将这个事务回滚。</li>
+<li>等待图：主动的死锁检测方式，InnoDB采用这种方式。这种机制会在每个事务请求锁并发生等待时都会判断是否有回路，若存在则有死锁，InnoDB 会选择回滚 undo 量最少的事务。如下图，t1 和 t2 就存在回路。（InnoDB1.2版本前使用dfs实现，之后用非递归方法实现）<br><img src="https://tva1.sinaimg.cn/large/0082zybpgy1gc1v70rzy0j30f40amq4b.jpg" alt="img"></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/29/InnoDB%E7%B4%A2%E5%BC%95%E4%B8%8E%E7%AE%97%E6%B3%95/" rel="prev" title="InnoDB索引与算法">
+      <i class="fa fa-chevron-left"></i> InnoDB索引与算法
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/03/29/InnoDB%E4%BA%8B%E5%8A%A1/" rel="next" title="InnoDB事务">
+      InnoDB事务 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#锁"><span class="nav-number">1.</span> <span class="nav-text">锁</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#InnoDB锁"><span class="nav-number">1.1.</span> <span class="nav-text">InnoDB锁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#锁的类型"><span class="nav-number">1.1.1.</span> <span class="nav-text">锁的类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一致性非锁定读"><span class="nav-number">1.1.2.</span> <span class="nav-text">一致性非锁定读</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一致性锁定读"><span class="nav-number">1.1.3.</span> <span class="nav-text">一致性锁定读</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#锁的算法"><span class="nav-number">1.1.4.</span> <span class="nav-text">锁的算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#幻读"><span class="nav-number">1.1.5.</span> <span class="nav-text">幻读</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#锁问题"><span class="nav-number">1.1.6.</span> <span class="nav-text">锁问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#死锁"><span class="nav-number">1.1.7.</span> <span class="nav-text">死锁</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.7.1
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
