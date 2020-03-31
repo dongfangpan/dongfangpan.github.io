@@ -46,15 +46,23 @@
   };
 </script>
 
-  <meta property="og:type" content="article">
+  <meta name="description" content="磁盘驱动器 磁盘的结构 寻道 I&#x2F;O时间图：首先寻道，然后等待转动延迟，最后传输。 I&#x2F;O时间 &#x3D; 寻道时间+旋转时间+传输时间 磁盘调度策略 最短寻道优先（SSTF） 最短定位时间优先（SPTF）     RAID RAID 0：磁盘1和磁盘2并行 容量：提供了N个有用容量，顶级。 可靠性：任何磁盘故障都会导致数据丢失。 性能：非常好，并行使用所有磁盘。   RAID 1：镜像，使每块磁盘都多一">
+<meta property="og:type" content="article">
 <meta property="og:title" content="操作系统导论-持久化">
 <meta property="og:url" content="http://yoursite.com/2020/03/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AF%BC%E8%AE%BA-%E6%8C%81%E4%B9%85%E5%8C%96/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="磁盘驱动器 磁盘的结构 寻道 I&#x2F;O时间图：首先寻道，然后等待转动延迟，最后传输。 I&#x2F;O时间 &#x3D; 寻道时间+旋转时间+传输时间 磁盘调度策略 最短寻道优先（SSTF） 最短定位时间优先（SPTF）     RAID RAID 0：磁盘1和磁盘2并行 容量：提供了N个有用容量，顶级。 可靠性：任何磁盘故障都会导致数据丢失。 性能：非常好，并行使用所有磁盘。   RAID 1：镜像，使每块磁盘都多一">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/00831rSTgy1gd6grglrjhj30ft0efgoq.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/00831rSTgy1gd6gu5fvydj30v80g2n1p.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/00831rSTgy1gd6hk5ln09j31ec0bcdrp.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/00831rSTgy1gd6mznjhdxj30u60703zi.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/00831rSTgy1gd6n6lt7acj30y208ataz.jpg">
 <meta property="article:published_time" content="2020-03-31T09:50:56.122Z">
-<meta property="article:modified_time" content="2020-03-31T09:51:55.497Z">
+<meta property="article:modified_time" content="2020-03-31T09:53:35.968Z">
 <meta property="article:author" content="John Doe">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tva1.sinaimg.cn/large/00831rSTgy1gd6grglrjhj30ft0efgoq.jpg">
 
 <link rel="canonical" href="http://yoursite.com/2020/03/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AF%BC%E8%AE%BA-%E6%8C%81%E4%B9%85%E5%8C%96/">
 
@@ -191,7 +199,7 @@
               <span class="post-meta-item-text">Posted on</span>
               
 
-              <time title="Created: 2020-03-31 17:50:56 / Modified: 17:51:55" itemprop="dateCreated datePublished" datetime="2020-03-31T17:50:56+08:00">2020-03-31</time>
+              <time title="Created: 2020-03-31 17:50:56 / Modified: 17:53:35" itemprop="dateCreated datePublished" datetime="2020-03-31T17:50:56+08:00">2020-03-31</time>
             </span>
 
           
@@ -205,7 +213,121 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        
+        <h4 id="磁盘驱动器"><a href="#磁盘驱动器" class="headerlink" title="磁盘驱动器"></a>磁盘驱动器</h4><ul>
+<li>磁盘的结构<br><img src="https://tva1.sinaimg.cn/large/00831rSTgy1gd6grglrjhj30ft0efgoq.jpg" alt="img"></li>
+<li>寻道<br><img src="https://tva1.sinaimg.cn/large/00831rSTgy1gd6gu5fvydj30v80g2n1p.jpg" alt="img"></li>
+<li>I/O时间图：首先寻道，然后等待转动延迟，最后传输。</li>
+<li>I/O时间 = 寻道时间+旋转时间+传输时间</li>
+<li>磁盘调度策略<ul>
+<li>最短寻道优先（SSTF）</li>
+<li>最短定位时间优先（SPTF）</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h4 id="RAID"><a href="#RAID" class="headerlink" title="RAID"></a>RAID</h4><ul>
+<li>RAID 0：磁盘1和磁盘2并行<ul>
+<li>容量：提供了N个有用容量，顶级。</li>
+<li>可靠性：任何磁盘故障都会导致数据丢失。</li>
+<li>性能：非常好，并行使用所有磁盘。</li>
+</ul>
+</li>
+<li>RAID 1：镜像，使每块磁盘都多一个副本<ul>
+<li>容量：减少了一半</li>
+<li>可靠性：一个磁盘坏了，可以用另一个，两个都坏了数据就丢失了。</li>
+<li>性能：多了复制的过程，需要完成2次物理写入，平均时间略高。</li>
+</ul>
+</li>
+<li>RAID 5：在每个磁盘中定义一个融于块，如果有一个磁盘坏了，可以通过其他磁盘算出这个磁盘的读写。<ul>
+<li>容量：N-1</li>
+<li>可靠性：可以运行一个磁盘故障</li>
+<li>性能：取决于带宽</li>
+</ul>
+</li>
+<li>RAID 10：混合了RAID 1和RAID 0<ul>
+<li>容量：减少一半</li>
+<li>可靠性：和RAID 1一样</li>
+<li>性能：和RAID 0基本一样<br><img src="https://tva1.sinaimg.cn/large/00831rSTgy1gd6hk5ln09j31ec0bcdrp.jpg" alt="img"></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="文件系统实现"><a href="#文件系统实现" class="headerlink" title="文件系统实现"></a>文件系统实现</h3><ul>
+<li>VSFS 文件系统：<ul>
+<li>D：数据区域，数据块</li>
+<li>I：inode，index node 索引节点</li>
+<li>id：inode位图i &amp; 数据位图d</li>
+<li>S：超级块，superBlock，表示该特定文件系统的信息：卷的大小、有多少inode、指向空闲列表块的头部指针等。<br><img src="https://tva1.sinaimg.cn/large/00831rSTgy1gd6mznjhdxj30u60703zi.jpg" alt="img"></li>
+</ul>
+</li>
+<li>inode：每个inode都有一个数字（inumber）隐式调用，给定一个inumber，能直接计算磁盘上相对应节点的位置。<br><img src="https://tva1.sinaimg.cn/large/00831rSTgy1gd6n6lt7acj30y208ataz.jpg" alt="img"></li>
+<li>多级索引：有一个间接指针，不是直接指向用户数据块，而是指向包含更多指针的块，每个指针指向用户数据。这个数据结构可以支持更大的文件。</li>
+<li>缓存和缓冲<ul>
+<li>没有缓存，每个打开文件都需要对目录层次结构中的每一个级别至少进行2次读，一次读inode，一次读数据。</li>
+<li>读有缓存的文件：第一次读可能会产生很多I/O流量，但是随后打开同一文件大部分流量会命中缓存，不需要考虑I/O。</li>
+<li>写有缓存的文件：写缓冲优点<ul>
+<li>通过延迟写入，文件系统可以将一些更新编成一批，放到一个小I/O中（比如把文件更新了又更新）</li>
+<li>通过将一些写入缓存在内存，系统可以调度后续I/O，提高性能。</li>
+<li>一些写入可以通过拖延避免。（比如写了又删）</li>
+</ul>
+</li>
+<li>现在大多数现代文件系统都把缓冲设为5～30s，但是可以使用<code>fsync()</code>绕过缓存直接I/O</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h4 id="日志"><a href="#日志" class="headerlink" title="日志"></a>日志</h4><ul>
+<li>数据日志<ol>
+<li>日志写入：将事务的内容（包括TxB-事务开始和更新内容）写入日志，等待这些写入完成。</li>
+<li>日志提交：将事务提交块（包括TxE-事务结束）写入日志，等待写完成，事务被认为已提交。</li>
+<li>加检查点：将更新内容写入其最终的磁盘位置。（让它与日志中即将进行的更新一致）</li>
+<li>释放：一段时间后，通过更新日志超级块，在日志中标记该事务为空闲。</li>
+</ol>
+</li>
+<li>元数据日志<ol>
+<li>数据写入：将数据写入最终位置，等待完成。</li>
+<li>日志元数据写入：将开始块和元数据写入日志，等待写入完成。</li>
+<li>日志提交：将事务提交块（包括TxE-事务结束）写入日志，等待写完成，事务被认为已提交。</li>
+<li>加检查点：将更新内容写入其最终的磁盘位置。</li>
+<li>释放：一段时间后，通过更新日志超级块，在日志中标记该事务为空闲。</li>
+</ol>
+</li>
+</ul>
+<hr>
+<ul>
+<li>copy-on-write:<ul>
+<li>原理<ul>
+<li>fork创建出的子进程，与父进程共享内存空间。也就是说，如果子进程不对内存空间进行写入操作的话，内存空间中的数据并不会复制给子进程，这样创建子进程的速度就很快了！(不用复制，直接引用父进程的物理空间)。</li>
+<li>并且如果在fork函数返回之后，子进程第一时间exec一个新的可执行映像，那么也不会浪费时间和内存空间了。</li>
+</ul>
+</li>
+<li>另一种表达方式<ul>
+<li>在fork之后exec之前两个进程用的是相同的物理空间（内存区），子进程的代码段、数据段、堆栈都是指向父进程的物理空间，也就是说，两者的虚拟空间不同，但其对应的物理空间是同一个。</li>
+<li>当父子进程中有更改相应段的行为发生时，再为子进程相应的段分配物理空间。</li>
+</ul>
+</li>
+<li>原理实现<ul>
+<li>fork()之后，kernel把父进程中所有的内存页的权限都设为read-only，然后子进程的地址空间指向父进程。当父子进程都只读内存时，相安无事。当其中某个进程写内存时，CPU硬件检测到内存页是read-only的，于是触发页异常中断（page-fault），陷入kernel的一个中断例程。中断例程中，kernel就会把触发的异常的页复制一份，于是父子进程各自持有独立的一份。</li>
+</ul>
+</li>
+<li>好处<ul>
+<li>COW技术可减少分配和复制大量资源时带来的瞬间延时。</li>
+<li>COW技术可减少不必要的资源分配。比如fork进程时，并不是所有的页面都需要复制，父进程的代码段和只读数据段都不被允许修改，所以无需复制。</li>
+</ul>
+</li>
+<li>缺点<ul>
+<li>如果在fork()之后，父子进程都还需要继续进行写操作，那么会产生大量的分页错误(页异常中断page-fault)，这样就得不偿失。</li>
+</ul>
+</li>
+<li>总结<ul>
+<li>fork出的子进程共享父进程的物理空间，当父子进程有内存写入操作时，read-only内存页发生中断，将触发的异常的内存页复制一份(其余的页还是共享父进程的)。</li>
+<li>fork出的子进程功能实现和父进程是一样的。如果有需要，我们会用exec()把当前进程映像替换成新的进程文件，完成自己想要实现的功能。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
     </div>
 
     
@@ -283,6 +405,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#磁盘驱动器"><span class="nav-number">1.</span> <span class="nav-text">磁盘驱动器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RAID"><span class="nav-number">2.</span> <span class="nav-text">RAID</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#文件系统实现"><span class="nav-number"></span> <span class="nav-text">文件系统实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#日志"><span class="nav-number">1.</span> <span class="nav-text">日志</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
