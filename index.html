@@ -655,775 +655,6 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/29/InnoDB%E4%BA%8B%E5%8A%A1/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/29/InnoDB%E4%BA%8B%E5%8A%A1/" class="post-title-link" itemprop="url">InnoDB事务</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2020-03-29 20:42:12" itemprop="dateCreated datePublished" datetime="2020-03-29T20:42:12+08:00">2020-03-29</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="事务"><a href="#事务" class="headerlink" title="事务"></a>事务</h1><p><strong>事务种类：</strong></p>
-<ol>
-<li>扁平事务<br>由 begin 开始，由 commit 或 rollback 结束，所有操作符合原子性，要么都执行，要么都回滚。</li>
-<li>带有保存节点的扁平事务<br>在事务中，隐式地设置了一个保存点，当问题出现时，保存点能用作内部的重启点，根据应用逻辑，决定是回到最近一个保存点还是其他更早的保存点。</li>
-<li>链事务<br>链事务在提交事务时，释放不需要的数据对象，将有必要的处理上下文隐式地传给下一个要开始的事务。链事务中的回滚也只限制与当前事务，即只能恢复到最近一个保存点。</li>
-<li>嵌套事务<br>一般不考，InnoDB 未采用。</li>
-<li>分布式事务<br>在分布式环境下运行的扁平事务，需要根据数据所在位置访问网络中的不同节点。同样需要 ACID 特性。</li>
-</ol>
-<h2 id="事务的实现"><a href="#事务的实现" class="headerlink" title="事务的实现"></a>事务的实现</h2><p><strong>两个日志：</strong></p>
-<ol>
-<li>redo log：重做日志，保证事务原子性（重做日志缓冲）和持久性（重做日志文件）。</li>
-<li>undo log：保证事务的一致性，用于回滚记录到某个特定的版本和MVCC。</li>
-</ol>
-<h3 id="redo-log"><a href="#redo-log" class="headerlink" title="redo log"></a>redo log</h3><ul>
-<li><p>每次重做日志缓冲写入重做日志文件后，InnoDB 都需要调用一次 fsync 操作。由于 fsync 的效率取决于磁盘的性能，因此磁盘的性能决定了事务提交的性能，也就是数据库的性能。</p>
-</li>
-<li><p>由</p>
-</li>
-</ul>
-  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">innodb_flush_log_at_trx_commit</span><br></pre></td></tr></table></figure>
-
-
-
-<p>  参数控制重做日志刷新到磁盘的策略</p>
-<ul>
-<li>1：默认值，表示事务提交时必须调用一次 fsync 操作</li>
-<li>0：表示提交事务时不进行写入重做日志文件操作，master thread 会每 1 秒进行一次重做日志文件的 fsync 操作。</li>
-<li>2：表示事务提交时将重做日志写入重做日志文件，但仅写入文件系统的缓存中，不进行 fsync 操作。</li>
-</ul>
-<ul>
-<li><p>为提高 fsync 效率，数据库提供了 group commit 功能，即一次 fsync 可以刷新确保多个事务日志被写入文件。操作：</p>
-<ul>
-<li>修改内存中事务对应的信息，并把日志写入重做日志缓冲。</li>
-<li>调用 fsync 将确保日志都从重做日志缓冲写入磁盘。</li>
-</ul>
-</li>
-</ul>
-<p><strong>redo log 和 binlog 区别</strong></p>
-<table>
-<thead>
-<tr>
-<th>redo log 重做日志</th>
-<th>binlog 二进制日志</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>在 InnoDB 存储引擎层产生</td>
-<td>在 MySQL 数据库的上层产生</td>
-</tr>
-<tr>
-<td>物理格式日志，其记录的是对于每个页的修改</td>
-<td>逻辑日志，其记录的是对应的 SQL 语句</td>
-</tr>
-<tr>
-<td>在事务进行中不断地被写入</td>
-<td>只是事务提交完成后进行一次写入</td>
-</tr>
-<tr>
-<td>循环使用</td>
-<td>不能循环使用，每次重启产生新的binlog文件</td>
-</tr>
-<tr>
-<td>异常宕机或介质故障后的数据恢复使用</td>
-<td>恢复数据时使用</td>
-</tr>
-</tbody></table>
-<p><strong>LSN（log sequence number） 日志序列号作用：</strong></p>
-<ol>
-<li>记录重做日志写入总量。</li>
-<li>确定 checkpoint 位置，对比数据库启动前后 LSN 变化。</li>
-<li>页的版本。</li>
-</ol>
-<h4 id="恢复"><a href="#恢复" class="headerlink" title="恢复"></a>恢复</h4><ul>
-<li>InnoDB 存储引擎在启动时不管上次数据库运行时是否正常关闭，都会尝试进行恢复操作。redo log 记录的是物理日志，所以恢复速度会比 binlog 快很多。</li>
-<li>由于 checkpoint 表示已经刷新到磁盘上的页的 LSN，所以恢复过程中仅需恢复 checkpoint 开始的日志部分。</li>
-</ul>
-<h3 id="undo-log"><a href="#undo-log" class="headerlink" title="undo log"></a>undo log</h3><p>如果用户执行的事务或语句由于某种原因失败了，又或者用户用一条 rollback 语句请求回滚，就可以利用这些 undo 信息将数据回滚到修改之前的样子。</p>
-<p><strong>undo log 原理</strong></p>
-<ul>
-<li>当 InnoDB 存储引擎回滚时，它实际上做的事与之前相反的工作。</li>
-<li>undo 的另一个作用的是 MVCC，即 InnoDB 存储引擎中的 MVCC 的实现是通过 undo 实现的。</li>
-<li>undo log 的产生会伴随着 redo log 的产生，因为 undo log 也需要持久性保护。</li>
-</ul>
-<p><strong>undo log 操作</strong></p>
-<ul>
-<li>事务提交时，InnoDB存储引擎会做以下2件事：<ul>
-<li>将 undo log 放入链表中，是否可以最终删除 undo log 和所在页由 purge 线程判断。</li>
-<li>判断 undo log 所在的页是否可以重用，若可以则分配给下一个事务使用。</li>
-</ul>
-</li>
-</ul>
-<p><strong>undo log 类型</strong></p>
-<ul>
-<li>insert undo log：只对事物本身可见，其他事务看不见，所以 undo log 可以在事务提交后直接删除，不需要 purge 操作。</li>
-<li>update undo log：是 delete 和 update 操作产生的 undo log；可能需要提供 MVCC 机制，因此不能在事务提交时就删除，提交时放入 undo log 链表，等待 purge 线程进行最后的删除。<ul>
-<li>delete操作实际上不会直接删除，而是将delete对象打上delete flag，标记为删除，最终的删除操作是purge线程完成的。</li>
-<li>update分为两种情况：update的列是否是主键列:<ul>
-<li>如果不是主键列，在undo log中直接反向记录是如何update的。即update是直接进行的。</li>
-<li>如果是主键列，update分两部执行：先删除该行，再插入一行目标行。</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="purge"><a href="#purge" class="headerlink" title="purge"></a>purge</h3><p><strong>purge 清理过程</strong><br><img src="https://tva1.sinaimg.cn/large/0082zybply1gc58xfh2bbj31fi0sygs2.jpg" alt="img"></p>
-<ol>
-<li>找到队尾的 tx1</li>
-<li>在 tx1 所在的 page1 中处理 tx1，tx3</li>
-<li>处理到 tx5 的时候发现 tx5 在使用</li>
-<li>重新去队列中找到队尾未处理的 tx2</li>
-<li>处理 tx2 所在的 page2 中的 tx2，tx6，tx4</li>
-</ol>
-<h3 id="分布式事务（XA事务）"><a href="#分布式事务（XA事务）" class="headerlink" title="分布式事务（XA事务）"></a>分布式事务（XA事务）</h3><ul>
-<li>使用分布式事务时，InnoDB 的事务隔离级别必须设置为 seriablizable。</li>
-<li>XA 事务允许不同数据库之间的分布式事务，可以在 MySQL 数据库、Oracle 数据库或SQL server数据库之间创建，只需要参与在全局事务中的每个节点都支持 XA 事务。</li>
-<li>分布式事务的两段式提交<ol>
-<li>所有参与全局事务的节点都开始准备（prepare），告诉事务管理器它们准备好提交了。</li>
-<li>事务管理器告诉资源管理器执行 rollbacks 还是 commit。</li>
-<li>如果任何一个节点不能提交，则所有的节点都被告知需要回滚。</li>
-</ol>
-</li>
-</ul>
-<h4 id="内部分布式事务"><a href="#内部分布式事务" class="headerlink" title="内部分布式事务"></a>内部分布式事务</h4><p>内部分布式事务存在于 binlog 和 InnoDB 存储引擎之间。在事务提交时，先写二进制日志binlog，再写重做日志redo log。这两个日志必须符合原子性，即需要同时写入。</p>
-<p><strong>过程：</strong></p>
-<ul>
-<li>当事务提交时，InnoDB 存储引擎会先做一个 prepare 操作，将事务的 xid 写入，然后在进行二进制日志写入。</li>
-<li>若在 InnoDB 存储引擎提交前，MySQL 数据库宕机了，MySQL 数据库在重启后会先检查准备的 UXID 事务是否提交，若没有，则在存储引擎层在进行一次提交操作。<br><img src="https://tva1.sinaimg.cn/large/0082zybply1gc5a9inof4j31gs0m8thd.jpg" alt="img"></li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/29/InnoDB%E9%94%81/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/29/InnoDB%E9%94%81/" class="post-title-link" itemprop="url">InnoDB锁</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-              
-
-              <time title="Created: 2020-03-29 20:41:41 / Modified: 20:41:52" itemprop="dateCreated datePublished" datetime="2020-03-29T20:41:41+08:00">2020-03-29</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="锁"><a href="#锁" class="headerlink" title="锁"></a>锁</h1><p>InnoDB存储引擎提供一致性的非锁定读、行级锁支持。行级锁没有相关额外的开销，并可以同时得到并发性和一致性。且InnoDB不需要锁升级，因为一个锁和多个锁开销是一样的。</p>
-<h2 id="InnoDB锁"><a href="#InnoDB锁" class="headerlink" title="InnoDB锁"></a>InnoDB锁</h2><h3 id="锁的类型"><a href="#锁的类型" class="headerlink" title="锁的类型"></a>锁的类型</h3><p><strong>InnoDB实现了两种标准行级锁：</strong></p>
-<ol>
-<li>共享锁（S Lock），允许事务读一行数据。</li>
-<li>排他锁（X Lock），允许事务修改或删除一行数据。</li>
-</ol>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>X</th>
-<th>S</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>X</td>
-<td>不兼容</td>
-<td>不兼容</td>
-</tr>
-<tr>
-<td>S</td>
-<td>不兼容</td>
-<td>兼容</td>
-</tr>
-</tbody></table>
-<h3 id="一致性非锁定读"><a href="#一致性非锁定读" class="headerlink" title="一致性非锁定读"></a>一致性非锁定读</h3><p>一致性的非锁定读是指 InnoDB 存储引擎通过行多版本控制的方法来读取当前执行时间数据库中行的数据。</p>
-<ul>
-<li>如果读取的行正在执行 delete 或 update 操作，这时读取操作不会因此去等待行上锁的释放。相反，InnoDB 会去读取行的快照数据。</li>
-<li>快照数据是指该行的之前版本的数据，这是通过 undo 段来完成。undo 段是用来在事务中回滚数据，因此快照数据本身没有开销，也不用上锁。</li>
-</ul>
-<p><strong>READ COMMITTED 和 REPEATABLE READ 一致性非锁定读区别</strong><br>READ COMMITTED：读取被锁定行的最新一份快照数据。<br>REPEATABLE READ：读取事务开始时的行数据版本。<br>例子：</p>
-<table>
-<thead>
-<tr>
-<th>时间</th>
-<th>会话A</th>
-<th>会话B</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>1</td>
-<td>begin</td>
-<td></td>
-</tr>
-<tr>
-<td>2</td>
-<td>select * from parent where id = 1;</td>
-<td></td>
-</tr>
-<tr>
-<td>3</td>
-<td></td>
-<td>begin</td>
-</tr>
-<tr>
-<td>4</td>
-<td></td>
-<td>update parent set id=3 where id=1;</td>
-</tr>
-<tr>
-<td>5</td>
-<td>select * from parent where id = 1;</td>
-<td></td>
-</tr>
-<tr>
-<td>6</td>
-<td></td>
-<td>commit</td>
-</tr>
-<tr>
-<td>7</td>
-<td>select * from parent where id = 1;</td>
-<td></td>
-</tr>
-<tr>
-<td>8</td>
-<td>commit</td>
-<td></td>
-</tr>
-</tbody></table>
-<p>在第五步的时候，若使用 READ COMMITTED 会返回一个 empty set；若用 REPEATABLE READ 则还是返回id=1的行。</p>
-<h3 id="一致性锁定读"><a href="#一致性锁定读" class="headerlink" title="一致性锁定读"></a>一致性锁定读</h3><p><strong>支持一致性锁定读的操作：</strong></p>
-<ol>
-<li>select … for update：对读取的行记录加一个 X 锁，其他事务不能对已锁定的行加上任何锁。</li>
-<li>select … lock in share mode：对读取的行记录加一个 S 锁，其他事务可以对该行加 S 锁，但不能加 X 锁。</li>
-</ol>
-<p>select … for update、select … lock in share mode 必须在一个事务中，当事务提交了，锁也就释放了。</p>
-<h3 id="锁的算法"><a href="#锁的算法" class="headerlink" title="锁的算法"></a>锁的算法</h3><p><strong>行锁的3种算法：</strong></p>
-<ul>
-<li>Record Lock：单个行记录上的锁，锁住索引记录</li>
-<li>Gap Lock：间隙锁，锁定一个范围，但不包含记录本身</li>
-<li>Next-Key Lock：Gap+Record,锁定一个范围，并且锁定记录本身</li>
-</ul>
-<p>Next-Key Lock 例子：<br>一个索引有 10、11、13、20 四个值，该索引就会被 Next-Key Lock 分为5个区间：(-∞,10]、(10,11]、(11,13]、(13,20]、(20,+∞]。</p>
-<p><strong>Next-Key Lock 降级算法</strong><br>当索引含有唯一属性时，InnoDB 会对 Next-Key Lock 进行优化，将其降级为 Record Lock，仅锁住索引本身，而不是范围。</p>
-<p><strong>辅助索引情况</strong></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE Z (</span><br><span class="line">	a INT,</span><br><span class="line">	b INT,</span><br><span class="line">	PRIMARY KEY (a),</span><br><span class="line">	KEY (b)</span><br><span class="line">);</span><br><span class="line">INSERT INTO Z</span><br><span class="line">VALUES</span><br><span class="line">	(1, 1),</span><br><span class="line">	(3, 1),</span><br><span class="line">	(5, 3),</span><br><span class="line">	(7, 6),</span><br><span class="line">	(10, 8);</span><br></pre></td></tr></table></figure>
-
-<p>在这个表中，a 为聚集索引， b 为辅助索引。<br>执行：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM Z WHERE b&#x3D;3 FOR UPDATE;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>对于聚集索引 a，会对等于5的索引加上 Record Key</li>
-<li>对于辅助索引 b，不仅会加上一个 Next-Key Lock：(1,3)，还会对下一个键值加上 gap lock：(3,6)。</li>
-</ul>
-<h3 id="幻读"><a href="#幻读" class="headerlink" title="幻读"></a>幻读</h3><p>幻读是指在同一事务下，连续执行两次同样的SQL语句可能导致不同的结果，第二次的SQL语句可能会返回之前不存在的行<br>例子：</p>
-<table>
-<thead>
-<tr>
-<th>时间</th>
-<th>会话A</th>
-<th>会话B</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>1</td>
-<td>set session tx_isolation=’read-committed’</td>
-<td></td>
-</tr>
-<tr>
-<td>2</td>
-<td>begin</td>
-<td></td>
-</tr>
-<tr>
-<td>3</td>
-<td>SELECT * FROM t WHERE a&gt; 2 FOR UPDATE; // 1 row a:5</td>
-<td></td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>4</td>
-<td></td>
-<td>begin</td>
-</tr>
-<tr>
-<td>5</td>
-<td></td>
-<td>insert into t select 4;</td>
-</tr>
-<tr>
-<td>6</td>
-<td></td>
-<td>commit</td>
-</tr>
-<tr>
-<td>7</td>
-<td>SELECT * FROM t WHERE a&gt; 2 FOR UPDATE; // 2 row a:4 a:5</td>
-<td></td>
-</tr>
-<tr>
-<td>8</td>
-<td>commit</td>
-<td></td>
-</tr>
-</tbody></table>
-<p>采用 Next-Key Lock 可以避免幻读，因为在 Next-Key Lock 模式下，SELECT * FROM t WHERE a&gt; 2 FOR UPDATE 会对（2，+∞）加上一个 X 锁。</p>
-<p><strong>所以 Next-Key Lock 可以解决幻读的问题。</strong></p>
-<h3 id="锁问题"><a href="#锁问题" class="headerlink" title="锁问题"></a>锁问题</h3><ol>
-<li>脏读<br>一个事务可以读到另外一个事务中未提交的数据。只有 read-uncommitted 模式下才会发生。</li>
-<li>不可重复读（幻读）<br>在一个事物内多次读取到同一个数据集合，但由于另一事务的修改，第一个事务两次读到的数据不一样。脏读是读为提交数据，幻读是读已经提交的数据。read-committed 模式下会发生幻读，read repeatable 可以避免幻读现象，因为采用了 Next-Key LocK。</li>
-<li>丢失更新<br>事务的更新操作会被另一个事务的更新操作所覆盖，从而导致数据不一致，避免的话需要让事务串行化，类似整个事务阶段都加锁。</li>
-</ol>
-<h3 id="死锁"><a href="#死锁" class="headerlink" title="死锁"></a>死锁</h3><p>死锁是指两个或多个事务在执行过程中，因争夺锁资源而造成的一种互相等待的现象。<br><strong>解决死锁的办法</strong></p>
-<ol>
-<li>超时：当两个事务相互等待时，当一个等待时间超过阈值，则将这个事务回滚。</li>
-<li>等待图：主动的死锁检测方式，InnoDB采用这种方式。这种机制会在每个事务请求锁并发生等待时都会判断是否有回路，若存在则有死锁，InnoDB 会选择回滚 undo 量最少的事务。如下图，t1 和 t2 就存在回路。（InnoDB1.2版本前使用dfs实现，之后用非递归方法实现）<br><img src="https://tva1.sinaimg.cn/large/0082zybpgy1gc1v70rzy0j30f40amq4b.jpg" alt="img"></li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/29/InnoDB%E7%B4%A2%E5%BC%95%E4%B8%8E%E7%AE%97%E6%B3%95/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/29/InnoDB%E7%B4%A2%E5%BC%95%E4%B8%8E%E7%AE%97%E6%B3%95/" class="post-title-link" itemprop="url">InnoDB索引与算法</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2020-03-29 20:40:50" itemprop="dateCreated datePublished" datetime="2020-03-29T20:40:50+08:00">2020-03-29</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="索引与算法"><a href="#索引与算法" class="headerlink" title="索引与算法"></a>索引与算法</h1><h2 id="B-树"><a href="#B-树" class="headerlink" title="B+ 树"></a>B+ 树</h2><p><strong>B+ 数的插入操作</strong></p>
-<table>
-<thead>
-<tr>
-<th>Leaf Page满</th>
-<th>Index Page满</th>
-<th>操作</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>NO</td>
-<td>No</td>
-<td>直接将记录插入到叶子节点</td>
-</tr>
-<tr>
-<td>Yes</td>
-<td>No</td>
-<td>1. 拆分Leaf Page； 2. 将中间的节点放入到Index Page中；3. 小于中间节点的记录放左边； 4. 大于或等于中间节点的记录放右边</td>
-</tr>
-<tr>
-<td>Yes</td>
-<td>Yes</td>
-<td>1. 拆分Leaf Page；2. 小于中间节点的记录放左边；3. 大于或等于中间节点的记录放右边；4.拆分Index Page；5. 小于中间节点的记录放左边；6. 大于中间节点的记录放右边；7. 中间节点放入上一层Index Page</td>
-</tr>
-</tbody></table>
-<p><strong>应对页拆分策略</strong><br>但是为了保持平衡对于新插入的键值可能需要做大量的拆分页（split）操作。因为B+树结构主要用于磁盘，页的拆分意味着磁盘的操作，所以应该在可能的情况下尽量减少页的拆分操作。因此，B+树同样提供了类似于平衡二叉树的旋转功能。(旋转发生在Leaf Page已经满，但是其的左右兄弟节点没有满的情况下。这时B+树并不会急于去做拆分页的操作，而是将记录移到所有页的兄弟节点上。在通常情况下，左兄弟会被首先检查用来做旋转操作。)</p>
-<p><strong>B+ 数的删除操作</strong><br>B+树使用填充因子（fill factor）来控制树的删除变化，50%是填充因子可设的最小值。</p>
-<table>
-<thead>
-<tr>
-<th>叶子节点小于填充因子</th>
-<th>中间节点小于填充因子</th>
-<th>操作</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>No</td>
-<td>No</td>
-<td>直接将记录从叶子节点删除，如果该节点还是Index Page的节点，用该节点的右节点代替</td>
-</tr>
-<tr>
-<td>Yes</td>
-<td>No</td>
-<td>合并叶子结点和它的兄弟节点，同时更新Index Page</td>
-</tr>
-<tr>
-<td>Yes</td>
-<td>Yes</td>
-<td>1. 合并叶子节点和它的兄弟节点 2. 更新Index Page 3. 合并Index Page和它的兄弟节点</td>
-</tr>
-</tbody></table>
-<h2 id="B-树索引"><a href="#B-树索引" class="headerlink" title="B+ 树索引"></a>B+ 树索引</h2><p><strong>B+ 树索引并不能找到一个给定键值的具体行，B+ 树索引能找到的只是被查找数据行所在的页。然后数据库通过把页读到内存，再在内存中进行查找，最后得到要查找的数据。</strong></p>
-<p><strong>聚簇索引</strong><br>在聚簇索引中寻找数据：</p>
-<ol>
-<li>在非叶子节点中找出主键所在数据页，在数据页中找到主键位置</li>
-<li>根据主键（Key）算出指向数据页的页号（Pointer）</li>
-<li>根据 Pointer 在叶子节点上找到对应的页</li>
-<li>在对应的页中找到主键对应的位置（页里面是按照主键顺序排列的双向链表）</li>
-<li>返回主键对应的数据信息</li>
-</ol>
-<p><img src="https://tva1.sinaimg.cn/large/0082zybpgy1gbw12kppi6j31880medmo.jpg" alt="img"></p>
-<h3 id="B-数索引管理"><a href="#B-数索引管理" class="headerlink" title="B+ 数索引管理"></a>B+ 数索引管理</h3><p><strong>MySQL 5.5版本之前的添加或删除索引操作：</strong></p>
-<ol>
-<li>首先创建一张新的临时表，表结构为通过命令ALTER TABLE新定义的结构。</li>
-<li>然后把原表中数据导入到临时表。</li>
-<li>接着删除原表。</li>
-<li>最后把临时表重名为原来的表名。</li>
-</ol>
-<p><strong>MySQL 5.5版本（InnoDB 1.0.x版本）</strong></p>
-<p><strong>Fast Index Creation（快速索引创建 FIC）</strong><br>对于辅助索引的创建，InnoDB存储引擎会对创建索引的表加上一个S锁。在创建的过程中，不需要重建表，因此速度较之前提高很多，并且数据库的可用性也得到了提高。删除辅助索引操作就更简单了，InnoDB存储引擎只需更新内部视图，并将辅助索引的空间标记为可用，同时删除MySQL数据库内部视图上对该表的索引定义即可。</p>
-<p><strong>FIC缺陷</strong></p>
-<ol>
-<li>由于FIC在索引的创建的过程中对表加上了S锁，因此在创建的过程中只能对该表进行读操作，若有大量的事务需要对目标表进行写操作，那么数据库的服务同样不可用。</li>
-<li>只限于辅助索引使用。</li>
-</ol>
-<p><strong>MySQL 5.6版本</strong></p>
-<p><strong>可以*在线*（边执行DML操作边执行DDL操作）DDL操作的有：</strong></p>
-<ol>
-<li>辅助索引的创建与删除</li>
-<li>改变自增长值</li>
-<li>添加或删除外键约束</li>
-<li>列的重命名</li>
-</ol>
-<p><strong>原理</strong><br>InnoDB实现Online DDL的原理是在执行创建或者删除操作的同时，将INSERT、UPDATE、DELETE这类DML操作日志写入到一个缓存中。待完成索引创建后再将重做应用到表上，以此达到数据的一致性。</p>
-<h2 id="Cardinality-值"><a href="#Cardinality-值" class="headerlink" title="Cardinality 值"></a>Cardinality 值</h2><p>show index 示例</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show index from t&#x2F;G</span><br><span class="line">****************** 1. row ******************</span><br><span class="line">Table: t</span><br><span class="line">...</span><br><span class="line">Cardinality: 2</span><br><span class="line">...</span><br><span class="line">Comment:</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>Cardinality 表示索引中不重复记录数量的<strong>预估值</strong>。</li>
-<li>Cardinality / n_rows_in_table 应尽可能接近 1。（表示有高区分度）</li>
-<li>更新 Cardinality 信息的策略<ul>
-<li>表中1/16的数据已发生过变化。</li>
-<li>stat_modified_counter &gt; 2,000,000,000</li>
-</ul>
-</li>
-<li>Cardinality 信息的统计和更新操作<ul>
-<li>取得 B+ 树索引页中叶子节点的数量，记为 A。</li>
-<li>随机取得B+树索引中的8个叶子节点。统计每个页不同记录的个数，即为 P1, P2, …, P8。</li>
-<li>根据采样信息给出 Cardinality 的预估值：Cardinality =（P1+P2+…+P8） * A/8。</li>
-</ul>
-</li>
-<li>因为 Cardinality 值是通过<strong>随机</strong>8个叶子节点预估得来，不是一个精确的值，所以每次得到的 Cardinality 值可能不同。</li>
-<li>重新计算索引的 Cardinality 值操作<ul>
-<li>执行SQL语句 ANALYZE TABLE、SHOW TABLE STATUS、SHOW INDEX</li>
-<li>访问 INFORMATION_SCHEMA 架构下的表 TABLES 和 STATISTICS</li>
-</ul>
-</li>
-</ul>
-<h2 id="B-树索引的使用"><a href="#B-树索引的使用" class="headerlink" title="B+ 树索引的使用"></a>B+ 树索引的使用</h2><h3 id="联合索引"><a href="#联合索引" class="headerlink" title="联合索引"></a>联合索引</h3><p>联合索引本质上也是一棵 B+ 树，如图，索引 (a, b) 的叶子节点会保证在 a 的顺序的前提下保证 b 的顺序。所以，对于单个的 a 查询是可以走 (a, b) 索引的，但是单个 b 查询不行。<br><img src="https://tva1.sinaimg.cn/large/0082zybpgy1gbw940ixz5j30pq08e0ud.jpg" alt="img"><br>同时，联合索引的第二个键值也是进行了排序处理的。</p>
-<h3 id="覆盖索引"><a href="#覆盖索引" class="headerlink" title="覆盖索引"></a>覆盖索引</h3><p>覆盖索引就是从辅助索引中就可以得到查询记录。好处就是不需要再去聚集索引中查找整行的数据，可以减少IO操作。<br>注意：执行以下操作是可以使用覆盖索引 (userid, buy_date) 的：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select count(*) from buy_log where buy_date&gt;&#39;2011-01-01&#39; and buy_date&lt;&#39;2011-12-01&#39;;</span><br></pre></td></tr></table></figure>
-
-<p>这里只用到了 buy_date 进行查询，但是因为是统计操作，所以可以用到覆盖索引。</p>
-<h3 id="优化器选择不使用索引的情况"><a href="#优化器选择不使用索引的情况" class="headerlink" title="优化器选择不使用索引的情况"></a>优化器选择不使用索引的情况</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select count(*) from order_details where orderid&gt;1000 and orderid&lt;10000;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>客户需要查询整行数据，如果使用orderid作为索引不能覆盖所有信息，所以在使用二级索引orderid查询出主键之后，还是需要在聚集索引中根据主键查找整行数据。</li>
-<li>如果要求访问的数据流很小，则优化器还是会选择辅助索引，但是当访问的数据占整个表中数据的蛮大一部分时(一般为20%左右)，优化器会通过聚集索引来查找数据。（原因是顺序读要远远快于离散读）</li>
-</ul>
-<h3 id="MRR-优化-amp-ICP-优化"><a href="#MRR-优化-amp-ICP-优化" class="headerlink" title="MRR 优化 &amp; ICP 优化"></a>MRR 优化 &amp; ICP 优化</h3><p>MMR 和 ICP 都是MySQL 5.6 开始支持的索引优化方式。</p>
-<p><strong>MMR（Multi-Range Read）适用于 range、ref、eq_ref类型查询，好处是：</strong></p>
-<ol>
-<li>MRR 是数据访问变得较为顺序</li>
-<li>减少缓冲池中页被替换次数</li>
-<li>批量处理对键值的查询操作</li>
-</ol>
-<p><strong>ICP（Index Condition Pushdown）原理：</strong><br>支持 ICP 之后，MySQL 数据库会在取出索引的同时，判断是否可以进行 WHERE 条件的过滤，也就是将 WHERE 的部分过滤操作放在了储存引擎层。<br>例子：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">select * from people</span><br><span class="line">    where zopcode &#x3D; &#39;311300&#39;</span><br><span class="line">    and lastname like &#39;%truni%&#39;</span><br><span class="line">    and address like &#39;%Main street%&#39;;</span><br></pre></td></tr></table></figure>
-
-<p>对于上述语句，若不支持 ICP 优化，数据库需要先通过索引取出所有 zipcode 等于 311300 的记录，然后再过滤 where 之后的 2 个条件。若支持 ICP 优化，数据库可以在索引取出时，就进行 where 条件的过滤，然后去获取记录。</p>
-<h2 id="全文检索"><a href="#全文检索" class="headerlink" title="全文检索"></a>全文检索</h2><p>对于以下语句，B+树索引是可以通过前缀索引进行查找的</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from blog where content like &#39;xxx%&#39;;</span><br></pre></td></tr></table></figure>
-
-<p>但是在更多情况下用户需要查询的内容是包含某单词的，如：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from blog where content like &#39;%xxx%&#39;;</span><br></pre></td></tr></table></figure>
-
-<p>这样的查询B+树索引就不能很好的完成工作。</p>
-<p>全文检索是将储存于数据库中的整本书或整篇文章中的任意内容信息查找出来的技术。InnoDB 1.2.x 版本开始，InnoDB 开始支持全文检索。</p>
-<h3 id="倒排索引"><a href="#倒排索引" class="headerlink" title="倒排索引"></a>倒排索引</h3><p>倒排索引和B+树索引一样，也是一种索引结构。它在辅助表中储存了单词和单词自身在一个或多个文档中所在的位置之间的映射。有2种表现形式：</p>
-<ol>
-<li>inverted file index，表现形式为{单词，单词所在的文档ID}</li>
-<li>full inverted index，表现形式为{单词，(单词所在的文档ID，具体在文档中的位置)}<br>例子：</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">具体实例，假设有三个文档</span><br><span class="line">T0 &#x3D; &quot;it is what it is&quot;</span><br><span class="line">T1 &#x3D; &quot;what is it&quot;</span><br><span class="line">T2 &#x3D; &quot;it is a banana&quot;</span><br><span class="line">采用inverted file index方式结果</span><br><span class="line">&quot;a&quot;:      &#123;2&#125;</span><br><span class="line">&quot;banana&quot;: &#123;2&#125;</span><br><span class="line">&quot;is&quot;:     &#123;0, 1, 2&#125;</span><br><span class="line">&quot;it&quot;:     &#123;0, 1, 2&#125;</span><br><span class="line">&quot;what&quot;:   &#123;0, 1&#125;</span><br><span class="line">采用full inverted index方式结果</span><br><span class="line">&quot;a&quot;:      &#123;(2, 2)&#125;</span><br><span class="line">&quot;banana&quot;: &#123;(2, 3)&#125;</span><br><span class="line">&quot;is&quot;:     &#123;(0, 1), (0, 4), (1, 1), (2, 1)&#125;</span><br><span class="line">&quot;it&quot;:     &#123;(0, 0), (0, 3), (1, 2), (2, 0)&#125;</span><br><span class="line">&quot;what&quot;:   &#123;(0, 2), (1, 0)&#125;</span><br></pre></td></tr></table></figure>
-
-<p><strong>InnoDB 支持的全文检索技术采用的就是 full inverted index 方式</strong></p>
-<p><strong>全文检索常用函数</strong></p>
-<ol>
-<li>Natural Language</li>
-<li>Boolean</li>
-<li>Query Expansion</li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/29/InnoDB%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/29/InnoDB%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/" class="post-title-link" itemprop="url">InnoDB存储引擎</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2020-03-29 20:40:01" itemprop="dateCreated datePublished" datetime="2020-03-29T20:40:01+08:00">2020-03-29</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="InnoDB存储引擎"><a href="#InnoDB存储引擎" class="headerlink" title="InnoDB存储引擎"></a>InnoDB存储引擎</h1><h2 id="InnoDB体系架构"><a href="#InnoDB体系架构" class="headerlink" title="InnoDB体系架构"></a>InnoDB体系架构</h2><h3 id="后台线程"><a href="#后台线程" class="headerlink" title="后台线程"></a>后台线程</h3><p><strong>线程类型：</strong></p>
-<ol>
-<li>Master Thread：负责将缓冲池中的数据异步刷新到磁盘，保证数据一致性（脏页刷新、合并插入缓冲、undo页回收）。</li>
-<li>IO Thread：InnoDB 用了大量 AIO（Async IO）处理写 IO 请求，IO Thread 负责这些 IO 请求的回调处理。</li>
-<li>Purge Thread：回收已经使用并分配的 undo 页。</li>
-<li>Page Cleaner Thread：减轻原 Master Thread 的工作，提高 InnoDB 存储性能。</li>
-</ol>
-<h3 id="内存"><a href="#内存" class="headerlink" title="内存"></a>内存</h3><h4 id="缓冲池"><a href="#缓冲池" class="headerlink" title="缓冲池"></a>缓冲池</h4><ul>
-<li>缓冲区是一块内存区域，通过内存的速度来弥补磁盘速度较慢对数据库性能影响。</li>
-<li>数据库首次读取页时，会把从磁盘里读取的页放在缓冲池中，下次该页被缓冲池命中，则读取页，否则，在磁盘里中读取。</li>
-<li>对于数据库中的页的修改操作，先修改缓存池中的页，再以一定的频率刷到磁盘中。（Checkpoint 机制）</li>
-<li>InnoDB内存数据对象<br><img src="https://tva1.sinaimg.cn/large/0082zybpgy1gbsr8nebt7j31680iqag2.jpg" alt="img"></li>
-</ul>
-<p><strong>LRU list</strong></p>
-<ul>
-<li>通常来说，数据库的缓冲池是通过 LRU 算法进行管理的（频繁使用的页在列表最前端，最少使用的页在尾端）。</li>
-<li>优化的 LRU 算法：新读到的页放到 LRU 列表的 midpoint 位置。（原因：当进行某些操作如索引或数据的扫描，可能会使缓冲池中的页被刷新出，影响缓冲池效率。这些操作访问的很多页都是仅在这次操作中需要，并不是活跃数据。）</li>
-</ul>
-<p><strong>LRU list vs Free list</strong><br>数据库刚启动时，LRU 列表是空的，所有页都存在 Free 列表中。当需要从缓冲池中分页时，首先从 Free 列表中查找是否有空闲页，若有则将该页从 Free 列表中删除，放入到 LRU 列表中。</p>
-<p><strong>脏页和Flush list</strong><br>在 LRU 列表中的页被修改后，称该页为脏页，即缓冲池中的页和磁盘上的页的数据产生了不一致。数据库会通过 CHECKPOINT 机制将脏页刷新回磁盘，Flush 列表中的页就是脏页列表。</p>
-<h4 id="重做日志缓冲、额外的内存池"><a href="#重做日志缓冲、额外的内存池" class="headerlink" title="重做日志缓冲、额外的内存池"></a>重做日志缓冲、额外的内存池</h4><p><strong>重做日志缓冲：</strong></p>
-<ul>
-<li>InnoDB 存储引擎首先将重做日志信息放到这个缓冲区，然后按照一定的频率刷新到重做日志文件。</li>
-<li>一般情况下 重做日志缓冲池只需要 8M 就够了，因为重做日志会在下面三种情况把内存刷到外部磁盘的重做日志文件中：<ul>
-<li>Master Thread 每一秒就会进行刷新操作</li>
-<li>每个事务提交就会进行刷新操作</li>
-<li>重做日志缓冲池空间剩余1/2时会进行刷新操作。</li>
-</ul>
-</li>
-</ul>
-<p><strong>额外的内存池：</strong><br>对一些数据结构本身的内存进行分配时，需要从额外的内存池中进行申请，当该区域不够时，会向缓冲池中进行申请。</p>
-<h3 id="Checkpoint-技术"><a href="#Checkpoint-技术" class="headerlink" title="Checkpoint 技术"></a>Checkpoint 技术</h3><p>Checkpoint 技术的目的是为了解决：</p>
-<ol>
-<li>缩短数据库的恢复时间<br>当数据库发生宕机时，数据库不需要重做所有的日志，因为 Checkpoint 之前的页都已经刷新回磁盘。</li>
-<li>缓冲池不够用时，将脏页刷新到磁盘<br>当缓冲池不够用时，LRU 算法回溢出最近最少使用的页，如果这个页是脏页，就前置执行 Checkpoint，将脏页刷进磁盘。</li>
-<li>重做日志不可用时，刷新脏页</li>
-</ol>
-<p>Innodb 有2种 Checkpoint</p>
-<ol>
-<li>Sharp Checkpoint：发生在数据库关闭时将所有的脏页都刷新回磁盘。</li>
-<li>Fuzzy Checkpoint：进行页刷新时，只刷新一部分脏页。<br>Master Thread Checkpoint、FLUSH_LRU_LIST Checkpoint、Async/Sync Flush Checkpoint、Dirty Page too much Checkpoint 都属于Fuzzy Checkpoint</li>
-</ol>
-<h3 id="InnoDB关键特性"><a href="#InnoDB关键特性" class="headerlink" title="InnoDB关键特性"></a>InnoDB关键特性</h3><h4 id="插入缓冲"><a href="#插入缓冲" class="headerlink" title="插入缓冲"></a>插入缓冲</h4><p><strong>Insert Buffer</strong></p>
-<ul>
-<li>Insert Buffer 和数据页一样，都是物理页的一个组成部分，并不是缓冲池中的一部分。</li>
-<li>插入聚集索引（Primary Key）是顺序的不需要磁盘随机读；对于非聚集辅助索引（secondary index）叶子节点的插入不是顺序的，需要离散的访问非聚集索引页，导致插入操作新能下降。（有些辅助索引插入仍是顺序的，比如ctime）</li>
-<li>对于非聚集索引的插入或更新操作，不是每一次都直接插入到索引页中，而是先判断插入的非聚集索引页是否在缓冲池中，若在直接插入，若不在先放到 Insert Buffer 对象中。然后以一定的频率和情况进行 Insert Buffer 和辅助索引叶子节点的 merge 操作。</li>
-<li>使用 Insert Buffer 需要满足一下子2个条件<ol>
-<li>索引是辅助索引</li>
-<li>索引不是唯一索引</li>
-</ol>
-</li>
-<li>例子：2246304 次 merge 可以 merge 7540969数据，比例差不多是1:3，代表了插入缓冲将对于非聚聚索引页的离散 IO 逻辑请求大约降低了 2/3</li>
-<li>Insert Buffer 的数据结构是一棵 B+ 树（非叶子节点存放的是查询的键值）</li>
-</ul>
-<p><strong>Change Buffer</strong></p>
-<ul>
-<li>Change Buffer 是 Insert Buffer 的升级，引入了 Delete Buffer 和 Purge Buffer。（对象依旧是非唯一的辅助索引）</li>
-<li>Delete 操作可能分为2个过程：<ol>
-<li>将记录标记为已删除（Delete Buffer 操作）</li>
-<li>真正将记录删除（Purge Buffer 操作）</li>
-</ol>
-</li>
-<li>SHOW ENGINE INNODB STATUS 展示：<br><img src="https://tva1.sinaimg.cn/large/0082zybpgy1gbtiwa09bej313y0j2n2t.jpg" alt="img"><br>insert 表示 Insert Buffer；delete mark 表示 Delete Buffer；delete 表示 Purge Buffer</li>
-</ul>
-<h3 id="两次写"><a href="#两次写" class="headerlink" title="两次写"></a>两次写</h3><p>为了解决partial page write问题，InnoDB实现了double write buffer，简单来说，就是在写数据页之前，先把这个数据页写到一块独立的物理文件位置（ibdata），然后再写到数据页。这样在宕机重启时，如果出现数据页损坏，那么在应用redo log之前，需要通过该页的副本来还原该页，然后再进行redo log重做，这就是double write。<br>工作流程：<br><img src="https://tva1.sinaimg.cn/large/0082zybpgy1gbtu60dga3j30j60dm767.jpg" alt="img"></p>
-<h3 id="自适应哈希索引"><a href="#自适应哈希索引" class="headerlink" title="自适应哈希索引"></a>自适应哈希索引</h3><ul>
-<li>InnoDB存储引擎会监控对表上各索引页的查询。如果观察到建立哈希索引可以带来速度提升,则建立哈希索引,称之为自适应哈希索引(Adaptive Hash Index,AHI) 。</li>
-<li>经常访问的二级索引数据（热点数据）会自动被生成到hash索引里面去(最近连续被访问三次的数据)，自适应哈希索引通过缓冲池的B+树构造而来，因此建立的速度很快。</li>
-<li>AHI 要求：<ul>
-<li>以该模式访问了100次</li>
-<li>页通过该模式访问了N次（N=页中记录 * 1/16）</li>
-</ul>
-</li>
-<li>AHI 缺点：<ol>
-<li>hash自适应索引会占用innodb buffer pool；</li>
-<li>自适应hash索引只适合搜索等值的查询（例如=、&lt;=&gt;、in），如select * from table where index_col=’xxx’，而对于其他查找类型，如范围查找，是不能使用的；</li>
-<li>极端情况下，自适应hash索引才有比较大的意义，可以降低逻辑读。</li>
-<li>无法用于排序</li>
-<li>有冲突可能</li>
-<li>MySQL自动管理，人为无法干预。</li>
-</ol>
-</li>
-</ul>
-<h3 id="异步-IO"><a href="#异步-IO" class="headerlink" title="异步 IO"></a>异步 IO</h3><p>采用异步 IO（Asynchronous IO，AIO）的方式来处理磁盘可以提高磁盘操作性能。</p>
-<p><strong>Sync IO vs AIO</strong><br>Sync IO 每进行一次 IO 操作，需要等待此次操作结束才能继续接下来的操作；AIO 可以在发出一个 IO 请求后立即在发出另一个 IO 请求，当全部 IO 请求发送完毕后，等待所有 IO 操作的完成。</p>
-<p><strong>IO merge</strong><br>将多个 IO 合并为一个 IO，以提高 IOPS 性能。<br>例子：用户需要访问页的（space, page_no）为：(8，6)、(8，7)、(8，8)。每页大小为16K，如果使用同步 IO 需要进行3次 IO 操作；而AIO 会判断这三个页是连续的，因此 AIO 底层会发送一个 IO 请求，从（8，6）开始读 48K 的页</p>
-<p><strong>刷新邻接页</strong><br>当刷新一个脏页时，innodb存储引擎会检测该页所在区(extent)的所有页，如果是脏页，那么一起进行刷新。这样做的好处显而易见，通过AIO可以将多个IO写入操作合并为一个IO操作，增大写入量，减少了物理写IO，故该工作机制在传统机械磁盘下有着显著的优势。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="en">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/29/Redis%E7%8B%AC%E7%AB%8B%E5%8A%9F%E8%83%BD%E5%AE%9E%E7%8E%B0/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1780,6 +1011,718 @@
 <li>执行预备操作</li>
 <li>调用命令的实现函数</li>
 <li>执行后续工作</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/02/23/InnoDB%E5%A4%87%E4%BB%BD%E4%B8%8E%E6%81%A2%E5%A4%8D/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/02/23/InnoDB%E5%A4%87%E4%BB%BD%E4%B8%8E%E6%81%A2%E5%A4%8D/" class="post-title-link" itemprop="url">InnoDB备份与恢复</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-02-23 22:22:27" itemprop="dateCreated datePublished" datetime="2020-02-23T22:22:27+08:00">2020-02-23</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="备份与恢复"><a href="#备份与恢复" class="headerlink" title="备份与恢复"></a>备份与恢复</h1><h2 id="备份方法"><a href="#备份方法" class="headerlink" title="备份方法"></a>备份方法</h2><p><strong>根据备份的方法不同可以分为：</strong></p>
+<ol>
+<li>Hot Backup（热备份）1<br>数据库运行中直接备份，对正在运行的数据库操作没有任何影响。</li>
+<li>Cold Backup（冷备份）<br>在数据库停止的情况下备份，冷备只需要复制相关的数据库物理文件（frm文件、共享空间文件、独立表空间文件–*.ibd、重做日志文件）即可。</li>
+<li>Warm Backup（温备份）<br>也是在数据库运行中进行，但是对当前数据库会有所影响，如加全局锁以保证一致性。</li>
+</ol>
+<p><strong>根据备份后文件的内容可以分为：</strong></p>
+<ol>
+<li>逻辑备份<br>内容一般为一条条 SQL，或者是表内实际数据。（如mysqldump、select * into outfile）可以观察到导出文件内容，适用于数据库升级以及迁移，但是恢复所需时间长。</li>
+<li>裸文件备份<br>指复制数据库的物理文件，可以在数据库运行或者停止时复制。（ibbackup、xtrabackup）恢复时间短。</li>
+</ol>
+<p><strong>根据备份数据库的内容可以分为：</strong></p>
+<ol>
+<li>完全备份</li>
+<li>增量备份</li>
+<li>日志备份</li>
+</ol>
+<p>对 MySQL 数据库的二进制日志的备份，通过对一个完全备份进行二进制日志重做（replay）来完成恢复工作。</p>
+<h2 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h2><h3 id="热备"><a href="#热备" class="headerlink" title="热备"></a>热备</h3><p><strong>热备原理</strong></p>
+<ol>
+<li>记录备份开始时，InnoDB 存储引擎重做日志文件检查点的 LSN。</li>
+<li>复制共享表空间文件以及独立表空间文件。（所有数据）</li>
+<li>记录复制完空间文件后，InnoDB 存储引擎重做文件检查点的 LSN。</li>
+<li>复制在备份时产生的重做日志。</li>
+</ol>
+<h3 id="复制（replication）"><a href="#复制（replication）" class="headerlink" title="复制（replication）"></a>复制（replication）</h3><p><strong>复制原理</strong></p>
+<ol>
+<li>主服务器 master 把数据更改记录到二进制文件日志 binlog 中。</li>
+<li>从服务器 slave 把主服务器的二进制文件复制到自己的中继日志 relay log 中</li>
+<li>从服务器重做中继日志中的日志，把更改应用到自己的数据库上，以达到数据库最终的一致性。</li>
+</ol>
+<p><img src="https://tva1.sinaimg.cn/large/0082zybply1gc6dv33jegj31a60r6til.jpg" alt="img"></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/02/20/InnoDB%E4%BA%8B%E5%8A%A1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/02/20/InnoDB%E4%BA%8B%E5%8A%A1/" class="post-title-link" itemprop="url">InnoDB备份与恢复</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-02-20 22:22:27" itemprop="dateCreated datePublished" datetime="2020-02-20T22:22:27+08:00">2020-02-20</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="事务"><a href="#事务" class="headerlink" title="事务"></a>事务</h1><p><strong>事务种类：</strong></p>
+<ol>
+<li>扁平事务<br>由 begin 开始，由 commit 或 rollback 结束，所有操作符合原子性，要么都执行，要么都回滚。</li>
+<li>带有保存节点的扁平事务<br>在事务中，隐式地设置了一个保存点，当问题出现时，保存点能用作内部的重启点，根据应用逻辑，决定是回到最近一个保存点还是其他更早的保存点。</li>
+<li>链事务<br>链事务在提交事务时，释放不需要的数据对象，将有必要的处理上下文隐式地传给下一个要开始的事务。链事务中的回滚也只限制与当前事务，即只能恢复到最近一个保存点。</li>
+<li>嵌套事务<br>一般不考，InnoDB 未采用。</li>
+<li>分布式事务<br>在分布式环境下运行的扁平事务，需要根据数据所在位置访问网络中的不同节点。同样需要 ACID 特性。</li>
+</ol>
+<h2 id="事务的实现"><a href="#事务的实现" class="headerlink" title="事务的实现"></a>事务的实现</h2><p><strong>两个日志：</strong></p>
+<ol>
+<li>redo log：重做日志，保证事务原子性（重做日志缓冲）和持久性（重做日志文件）。</li>
+<li>undo log：保证事务的一致性，用于回滚记录到某个特定的版本和MVCC。</li>
+</ol>
+<h3 id="redo-log"><a href="#redo-log" class="headerlink" title="redo log"></a>redo log</h3><ul>
+<li><p>每次重做日志缓冲写入重做日志文件后，InnoDB 都需要调用一次 fsync 操作。由于 fsync 的效率取决于磁盘的性能，因此磁盘的性能决定了事务提交的性能，也就是数据库的性能。</p>
+</li>
+<li><p>由</p>
+</li>
+</ul>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">innodb_flush_log_at_trx_commit</span><br></pre></td></tr></table></figure>
+
+
+
+<p>  参数控制重做日志刷新到磁盘的策略</p>
+<ul>
+<li>1：默认值，表示事务提交时必须调用一次 fsync 操作</li>
+<li>0：表示提交事务时不进行写入重做日志文件操作，master thread 会每 1 秒进行一次重做日志文件的 fsync 操作。</li>
+<li>2：表示事务提交时将重做日志写入重做日志文件，但仅写入文件系统的缓存中，不进行 fsync 操作。</li>
+</ul>
+<ul>
+<li><p>为提高 fsync 效率，数据库提供了 group commit 功能，即一次 fsync 可以刷新确保多个事务日志被写入文件。操作：</p>
+<ul>
+<li>修改内存中事务对应的信息，并把日志写入重做日志缓冲。</li>
+<li>调用 fsync 将确保日志都从重做日志缓冲写入磁盘。</li>
+</ul>
+</li>
+</ul>
+<p><strong>redo log 和 binlog 区别</strong></p>
+<table>
+<thead>
+<tr>
+<th>redo log 重做日志</th>
+<th>binlog 二进制日志</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>在 InnoDB 存储引擎层产生</td>
+<td>在 MySQL 数据库的上层产生</td>
+</tr>
+<tr>
+<td>物理格式日志，其记录的是对于每个页的修改</td>
+<td>逻辑日志，其记录的是对应的 SQL 语句</td>
+</tr>
+<tr>
+<td>在事务进行中不断地被写入</td>
+<td>只是事务提交完成后进行一次写入</td>
+</tr>
+<tr>
+<td>循环使用</td>
+<td>不能循环使用，每次重启产生新的binlog文件</td>
+</tr>
+<tr>
+<td>异常宕机或介质故障后的数据恢复使用</td>
+<td>恢复数据时使用</td>
+</tr>
+</tbody></table>
+<p><strong>LSN（log sequence number） 日志序列号作用：</strong></p>
+<ol>
+<li>记录重做日志写入总量。</li>
+<li>确定 checkpoint 位置，对比数据库启动前后 LSN 变化。</li>
+<li>页的版本。</li>
+</ol>
+<h4 id="恢复"><a href="#恢复" class="headerlink" title="恢复"></a>恢复</h4><ul>
+<li>InnoDB 存储引擎在启动时不管上次数据库运行时是否正常关闭，都会尝试进行恢复操作。redo log 记录的是物理日志，所以恢复速度会比 binlog 快很多。</li>
+<li>由于 checkpoint 表示已经刷新到磁盘上的页的 LSN，所以恢复过程中仅需恢复 checkpoint 开始的日志部分。</li>
+</ul>
+<h3 id="undo-log"><a href="#undo-log" class="headerlink" title="undo log"></a>undo log</h3><p>如果用户执行的事务或语句由于某种原因失败了，又或者用户用一条 rollback 语句请求回滚，就可以利用这些 undo 信息将数据回滚到修改之前的样子。</p>
+<p><strong>undo log 原理</strong></p>
+<ul>
+<li>当 InnoDB 存储引擎回滚时，它实际上做的事与之前相反的工作。</li>
+<li>undo 的另一个作用的是 MVCC，即 InnoDB 存储引擎中的 MVCC 的实现是通过 undo 实现的。</li>
+<li>undo log 的产生会伴随着 redo log 的产生，因为 undo log 也需要持久性保护。</li>
+</ul>
+<p><strong>undo log 操作</strong></p>
+<ul>
+<li>事务提交时，InnoDB存储引擎会做以下2件事：<ul>
+<li>将 undo log 放入链表中，是否可以最终删除 undo log 和所在页由 purge 线程判断。</li>
+<li>判断 undo log 所在的页是否可以重用，若可以则分配给下一个事务使用。</li>
+</ul>
+</li>
+</ul>
+<p><strong>undo log 类型</strong></p>
+<ul>
+<li>insert undo log：只对事物本身可见，其他事务看不见，所以 undo log 可以在事务提交后直接删除，不需要 purge 操作。</li>
+<li>update undo log：是 delete 和 update 操作产生的 undo log；可能需要提供 MVCC 机制，因此不能在事务提交时就删除，提交时放入 undo log 链表，等待 purge 线程进行最后的删除。<ul>
+<li>delete操作实际上不会直接删除，而是将delete对象打上delete flag，标记为删除，最终的删除操作是purge线程完成的。</li>
+<li>update分为两种情况：update的列是否是主键列:<ul>
+<li>如果不是主键列，在undo log中直接反向记录是如何update的。即update是直接进行的。</li>
+<li>如果是主键列，update分两部执行：先删除该行，再插入一行目标行。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="purge"><a href="#purge" class="headerlink" title="purge"></a>purge</h3><p><strong>purge 清理过程</strong><br><img src="https://tva1.sinaimg.cn/large/0082zybply1gc58xfh2bbj31fi0sygs2.jpg" alt="img"></p>
+<ol>
+<li>找到队尾的 tx1</li>
+<li>在 tx1 所在的 page1 中处理 tx1，tx3</li>
+<li>处理到 tx5 的时候发现 tx5 在使用</li>
+<li>重新去队列中找到队尾未处理的 tx2</li>
+<li>处理 tx2 所在的 page2 中的 tx2，tx6，tx4</li>
+</ol>
+<h3 id="分布式事务（XA事务）"><a href="#分布式事务（XA事务）" class="headerlink" title="分布式事务（XA事务）"></a>分布式事务（XA事务）</h3><ul>
+<li>使用分布式事务时，InnoDB 的事务隔离级别必须设置为 seriablizable。</li>
+<li>XA 事务允许不同数据库之间的分布式事务，可以在 MySQL 数据库、Oracle 数据库或SQL server数据库之间创建，只需要参与在全局事务中的每个节点都支持 XA 事务。</li>
+<li>分布式事务的两段式提交<ol>
+<li>所有参与全局事务的节点都开始准备（prepare），告诉事务管理器它们准备好提交了。</li>
+<li>事务管理器告诉资源管理器执行 rollbacks 还是 commit。</li>
+<li>如果任何一个节点不能提交，则所有的节点都被告知需要回滚。</li>
+</ol>
+</li>
+</ul>
+<h4 id="内部分布式事务"><a href="#内部分布式事务" class="headerlink" title="内部分布式事务"></a>内部分布式事务</h4><p>内部分布式事务存在于 binlog 和 InnoDB 存储引擎之间。在事务提交时，先写二进制日志binlog，再写重做日志redo log。这两个日志必须符合原子性，即需要同时写入。</p>
+<p><strong>过程：</strong></p>
+<ul>
+<li>当事务提交时，InnoDB 存储引擎会先做一个 prepare 操作，将事务的 xid 写入，然后在进行二进制日志写入。</li>
+<li>若在 InnoDB 存储引擎提交前，MySQL 数据库宕机了，MySQL 数据库在重启后会先检查准备的 UXID 事务是否提交，若没有，则在存储引擎层在进行一次提交操作。<br><img src="https://tva1.sinaimg.cn/large/0082zybply1gc5a9inof4j31gs0m8thd.jpg" alt="img"></li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/02/19/InnoDB%E9%94%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/02/19/InnoDB%E9%94%81/" class="post-title-link" itemprop="url">InnoDB备份与恢复</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-02-19 22:22:27" itemprop="dateCreated datePublished" datetime="2020-02-19T22:22:27+08:00">2020-02-19</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="锁"><a href="#锁" class="headerlink" title="锁"></a>锁</h1><p>InnoDB存储引擎提供一致性的非锁定读、行级锁支持。行级锁没有相关额外的开销，并可以同时得到并发性和一致性。且InnoDB不需要锁升级，因为一个锁和多个锁开销是一样的。</p>
+<h2 id="InnoDB锁"><a href="#InnoDB锁" class="headerlink" title="InnoDB锁"></a>InnoDB锁</h2><h3 id="锁的类型"><a href="#锁的类型" class="headerlink" title="锁的类型"></a>锁的类型</h3><p><strong>InnoDB实现了两种标准行级锁：</strong></p>
+<ol>
+<li>共享锁（S Lock），允许事务读一行数据。</li>
+<li>排他锁（X Lock），允许事务修改或删除一行数据。</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>X</th>
+<th>S</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>X</td>
+<td>不兼容</td>
+<td>不兼容</td>
+</tr>
+<tr>
+<td>S</td>
+<td>不兼容</td>
+<td>兼容</td>
+</tr>
+</tbody></table>
+<h3 id="一致性非锁定读"><a href="#一致性非锁定读" class="headerlink" title="一致性非锁定读"></a>一致性非锁定读</h3><p>一致性的非锁定读是指 InnoDB 存储引擎通过行多版本控制的方法来读取当前执行时间数据库中行的数据。</p>
+<ul>
+<li>如果读取的行正在执行 delete 或 update 操作，这时读取操作不会因此去等待行上锁的释放。相反，InnoDB 会去读取行的快照数据。</li>
+<li>快照数据是指该行的之前版本的数据，这是通过 undo 段来完成。undo 段是用来在事务中回滚数据，因此快照数据本身没有开销，也不用上锁。</li>
+</ul>
+<p><strong>READ COMMITTED 和 REPEATABLE READ 一致性非锁定读区别</strong><br>READ COMMITTED：读取被锁定行的最新一份快照数据。<br>REPEATABLE READ：读取事务开始时的行数据版本。<br>例子：</p>
+<table>
+<thead>
+<tr>
+<th>时间</th>
+<th>会话A</th>
+<th>会话B</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>begin</td>
+<td></td>
+</tr>
+<tr>
+<td>2</td>
+<td>select * from parent where id = 1;</td>
+<td></td>
+</tr>
+<tr>
+<td>3</td>
+<td></td>
+<td>begin</td>
+</tr>
+<tr>
+<td>4</td>
+<td></td>
+<td>update parent set id=3 where id=1;</td>
+</tr>
+<tr>
+<td>5</td>
+<td>select * from parent where id = 1;</td>
+<td></td>
+</tr>
+<tr>
+<td>6</td>
+<td></td>
+<td>commit</td>
+</tr>
+<tr>
+<td>7</td>
+<td>select * from parent where id = 1;</td>
+<td></td>
+</tr>
+<tr>
+<td>8</td>
+<td>commit</td>
+<td></td>
+</tr>
+</tbody></table>
+<p>在第五步的时候，若使用 READ COMMITTED 会返回一个 empty set；若用 REPEATABLE READ 则还是返回id=1的行。</p>
+<h3 id="一致性锁定读"><a href="#一致性锁定读" class="headerlink" title="一致性锁定读"></a>一致性锁定读</h3><p><strong>支持一致性锁定读的操作：</strong></p>
+<ol>
+<li>select … for update：对读取的行记录加一个 X 锁，其他事务不能对已锁定的行加上任何锁。</li>
+<li>select … lock in share mode：对读取的行记录加一个 S 锁，其他事务可以对该行加 S 锁，但不能加 X 锁。</li>
+</ol>
+<p>select … for update、select … lock in share mode 必须在一个事务中，当事务提交了，锁也就释放了。</p>
+<h3 id="锁的算法"><a href="#锁的算法" class="headerlink" title="锁的算法"></a>锁的算法</h3><p><strong>行锁的3种算法：</strong></p>
+<ul>
+<li>Record Lock：单个行记录上的锁，锁住索引记录</li>
+<li>Gap Lock：间隙锁，锁定一个范围，但不包含记录本身</li>
+<li>Next-Key Lock：Gap+Record,锁定一个范围，并且锁定记录本身</li>
+</ul>
+<p>Next-Key Lock 例子：<br>一个索引有 10、11、13、20 四个值，该索引就会被 Next-Key Lock 分为5个区间：(-∞,10]、(10,11]、(11,13]、(13,20]、(20,+∞]。</p>
+<p><strong>Next-Key Lock 降级算法</strong><br>当索引含有唯一属性时，InnoDB 会对 Next-Key Lock 进行优化，将其降级为 Record Lock，仅锁住索引本身，而不是范围。</p>
+<p><strong>辅助索引情况</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE Z (</span><br><span class="line">	a INT,</span><br><span class="line">	b INT,</span><br><span class="line">	PRIMARY KEY (a),</span><br><span class="line">	KEY (b)</span><br><span class="line">);</span><br><span class="line">INSERT INTO Z</span><br><span class="line">VALUES</span><br><span class="line">	(1, 1),</span><br><span class="line">	(3, 1),</span><br><span class="line">	(5, 3),</span><br><span class="line">	(7, 6),</span><br><span class="line">	(10, 8);</span><br></pre></td></tr></table></figure>
+
+<p>在这个表中，a 为聚集索引， b 为辅助索引。<br>执行：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM Z WHERE b&#x3D;3 FOR UPDATE;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>对于聚集索引 a，会对等于5的索引加上 Record Key</li>
+<li>对于辅助索引 b，不仅会加上一个 Next-Key Lock：(1,3)，还会对下一个键值加上 gap lock：(3,6)。</li>
+</ul>
+<h3 id="幻读"><a href="#幻读" class="headerlink" title="幻读"></a>幻读</h3><p>幻读是指在同一事务下，连续执行两次同样的SQL语句可能导致不同的结果，第二次的SQL语句可能会返回之前不存在的行<br>例子：</p>
+<table>
+<thead>
+<tr>
+<th>时间</th>
+<th>会话A</th>
+<th>会话B</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>set session tx_isolation=’read-committed’</td>
+<td></td>
+</tr>
+<tr>
+<td>2</td>
+<td>begin</td>
+<td></td>
+</tr>
+<tr>
+<td>3</td>
+<td>SELECT * FROM t WHERE a&gt; 2 FOR UPDATE; // 1 row a:5</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>4</td>
+<td></td>
+<td>begin</td>
+</tr>
+<tr>
+<td>5</td>
+<td></td>
+<td>insert into t select 4;</td>
+</tr>
+<tr>
+<td>6</td>
+<td></td>
+<td>commit</td>
+</tr>
+<tr>
+<td>7</td>
+<td>SELECT * FROM t WHERE a&gt; 2 FOR UPDATE; // 2 row a:4 a:5</td>
+<td></td>
+</tr>
+<tr>
+<td>8</td>
+<td>commit</td>
+<td></td>
+</tr>
+</tbody></table>
+<p>采用 Next-Key Lock 可以避免幻读，因为在 Next-Key Lock 模式下，SELECT * FROM t WHERE a&gt; 2 FOR UPDATE 会对（2，+∞）加上一个 X 锁。</p>
+<p><strong>所以 Next-Key Lock 可以解决幻读的问题。</strong></p>
+<h3 id="锁问题"><a href="#锁问题" class="headerlink" title="锁问题"></a>锁问题</h3><ol>
+<li>脏读<br>一个事务可以读到另外一个事务中未提交的数据。只有 read-uncommitted 模式下才会发生。</li>
+<li>不可重复读（幻读）<br>在一个事物内多次读取到同一个数据集合，但由于另一事务的修改，第一个事务两次读到的数据不一样。脏读是读为提交数据，幻读是读已经提交的数据。read-committed 模式下会发生幻读，read repeatable 可以避免幻读现象，因为采用了 Next-Key LocK。</li>
+<li>丢失更新<br>事务的更新操作会被另一个事务的更新操作所覆盖，从而导致数据不一致，避免的话需要让事务串行化，类似整个事务阶段都加锁。</li>
+</ol>
+<h3 id="死锁"><a href="#死锁" class="headerlink" title="死锁"></a>死锁</h3><p>死锁是指两个或多个事务在执行过程中，因争夺锁资源而造成的一种互相等待的现象。<br><strong>解决死锁的办法</strong></p>
+<ol>
+<li>超时：当两个事务相互等待时，当一个等待时间超过阈值，则将这个事务回滚。</li>
+<li>等待图：主动的死锁检测方式，InnoDB采用这种方式。这种机制会在每个事务请求锁并发生等待时都会判断是否有回路，若存在则有死锁，InnoDB 会选择回滚 undo 量最少的事务。如下图，t1 和 t2 就存在回路。（InnoDB1.2版本前使用dfs实现，之后用非递归方法实现）<br><img src="https://tva1.sinaimg.cn/large/0082zybpgy1gc1v70rzy0j30f40amq4b.jpg" alt="img"></li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/02/14/InnoDB%E7%B4%A2%E5%BC%95%E4%B8%8E%E7%AE%97%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/02/14/InnoDB%E7%B4%A2%E5%BC%95%E4%B8%8E%E7%AE%97%E6%B3%95/" class="post-title-link" itemprop="url">InnoDB备份与恢复</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-02-14 22:22:27" itemprop="dateCreated datePublished" datetime="2020-02-14T22:22:27+08:00">2020-02-14</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="索引与算法"><a href="#索引与算法" class="headerlink" title="索引与算法"></a>索引与算法</h1><h2 id="B-树"><a href="#B-树" class="headerlink" title="B+ 树"></a>B+ 树</h2><p><strong>B+ 数的插入操作</strong></p>
+<table>
+<thead>
+<tr>
+<th>Leaf Page满</th>
+<th>Index Page满</th>
+<th>操作</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>NO</td>
+<td>No</td>
+<td>直接将记录插入到叶子节点</td>
+</tr>
+<tr>
+<td>Yes</td>
+<td>No</td>
+<td>1. 拆分Leaf Page； 2. 将中间的节点放入到Index Page中；3. 小于中间节点的记录放左边； 4. 大于或等于中间节点的记录放右边</td>
+</tr>
+<tr>
+<td>Yes</td>
+<td>Yes</td>
+<td>1. 拆分Leaf Page；2. 小于中间节点的记录放左边；3. 大于或等于中间节点的记录放右边；4.拆分Index Page；5. 小于中间节点的记录放左边；6. 大于中间节点的记录放右边；7. 中间节点放入上一层Index Page</td>
+</tr>
+</tbody></table>
+<p><strong>应对页拆分策略</strong><br>但是为了保持平衡对于新插入的键值可能需要做大量的拆分页（split）操作。因为B+树结构主要用于磁盘，页的拆分意味着磁盘的操作，所以应该在可能的情况下尽量减少页的拆分操作。因此，B+树同样提供了类似于平衡二叉树的旋转功能。(旋转发生在Leaf Page已经满，但是其的左右兄弟节点没有满的情况下。这时B+树并不会急于去做拆分页的操作，而是将记录移到所有页的兄弟节点上。在通常情况下，左兄弟会被首先检查用来做旋转操作。)</p>
+<p><strong>B+ 数的删除操作</strong><br>B+树使用填充因子（fill factor）来控制树的删除变化，50%是填充因子可设的最小值。</p>
+<table>
+<thead>
+<tr>
+<th>叶子节点小于填充因子</th>
+<th>中间节点小于填充因子</th>
+<th>操作</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>No</td>
+<td>No</td>
+<td>直接将记录从叶子节点删除，如果该节点还是Index Page的节点，用该节点的右节点代替</td>
+</tr>
+<tr>
+<td>Yes</td>
+<td>No</td>
+<td>合并叶子结点和它的兄弟节点，同时更新Index Page</td>
+</tr>
+<tr>
+<td>Yes</td>
+<td>Yes</td>
+<td>1. 合并叶子节点和它的兄弟节点 2. 更新Index Page 3. 合并Index Page和它的兄弟节点</td>
+</tr>
+</tbody></table>
+<h2 id="B-树索引"><a href="#B-树索引" class="headerlink" title="B+ 树索引"></a>B+ 树索引</h2><p><strong>B+ 树索引并不能找到一个给定键值的具体行，B+ 树索引能找到的只是被查找数据行所在的页。然后数据库通过把页读到内存，再在内存中进行查找，最后得到要查找的数据。</strong></p>
+<p><strong>聚簇索引</strong><br>在聚簇索引中寻找数据：</p>
+<ol>
+<li>在非叶子节点中找出主键所在数据页，在数据页中找到主键位置</li>
+<li>根据主键（Key）算出指向数据页的页号（Pointer）</li>
+<li>根据 Pointer 在叶子节点上找到对应的页</li>
+<li>在对应的页中找到主键对应的位置（页里面是按照主键顺序排列的双向链表）</li>
+<li>返回主键对应的数据信息</li>
+</ol>
+<p><img src="https://tva1.sinaimg.cn/large/0082zybpgy1gbw12kppi6j31880medmo.jpg" alt="img"></p>
+<h3 id="B-数索引管理"><a href="#B-数索引管理" class="headerlink" title="B+ 数索引管理"></a>B+ 数索引管理</h3><p><strong>MySQL 5.5版本之前的添加或删除索引操作：</strong></p>
+<ol>
+<li>首先创建一张新的临时表，表结构为通过命令ALTER TABLE新定义的结构。</li>
+<li>然后把原表中数据导入到临时表。</li>
+<li>接着删除原表。</li>
+<li>最后把临时表重名为原来的表名。</li>
+</ol>
+<p><strong>MySQL 5.5版本（InnoDB 1.0.x版本）</strong></p>
+<p><strong>Fast Index Creation（快速索引创建 FIC）</strong><br>对于辅助索引的创建，InnoDB存储引擎会对创建索引的表加上一个S锁。在创建的过程中，不需要重建表，因此速度较之前提高很多，并且数据库的可用性也得到了提高。删除辅助索引操作就更简单了，InnoDB存储引擎只需更新内部视图，并将辅助索引的空间标记为可用，同时删除MySQL数据库内部视图上对该表的索引定义即可。</p>
+<p><strong>FIC缺陷</strong></p>
+<ol>
+<li>由于FIC在索引的创建的过程中对表加上了S锁，因此在创建的过程中只能对该表进行读操作，若有大量的事务需要对目标表进行写操作，那么数据库的服务同样不可用。</li>
+<li>只限于辅助索引使用。</li>
+</ol>
+<p><strong>MySQL 5.6版本</strong></p>
+<p><strong>可以*在线*（边执行DML操作边执行DDL操作）DDL操作的有：</strong></p>
+<ol>
+<li>辅助索引的创建与删除</li>
+<li>改变自增长值</li>
+<li>添加或删除外键约束</li>
+<li>列的重命名</li>
+</ol>
+<p><strong>原理</strong><br>InnoDB实现Online DDL的原理是在执行创建或者删除操作的同时，将INSERT、UPDATE、DELETE这类DML操作日志写入到一个缓存中。待完成索引创建后再将重做应用到表上，以此达到数据的一致性。</p>
+<h2 id="Cardinality-值"><a href="#Cardinality-值" class="headerlink" title="Cardinality 值"></a>Cardinality 值</h2><p>show index 示例</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show index from t&#x2F;G</span><br><span class="line">****************** 1. row ******************</span><br><span class="line">Table: t</span><br><span class="line">...</span><br><span class="line">Cardinality: 2</span><br><span class="line">...</span><br><span class="line">Comment:</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Cardinality 表示索引中不重复记录数量的<strong>预估值</strong>。</li>
+<li>Cardinality / n_rows_in_table 应尽可能接近 1。（表示有高区分度）</li>
+<li>更新 Cardinality 信息的策略<ul>
+<li>表中1/16的数据已发生过变化。</li>
+<li>stat_modified_counter &gt; 2,000,000,000</li>
+</ul>
+</li>
+<li>Cardinality 信息的统计和更新操作<ul>
+<li>取得 B+ 树索引页中叶子节点的数量，记为 A。</li>
+<li>随机取得B+树索引中的8个叶子节点。统计每个页不同记录的个数，即为 P1, P2, …, P8。</li>
+<li>根据采样信息给出 Cardinality 的预估值：Cardinality =（P1+P2+…+P8） * A/8。</li>
+</ul>
+</li>
+<li>因为 Cardinality 值是通过<strong>随机</strong>8个叶子节点预估得来，不是一个精确的值，所以每次得到的 Cardinality 值可能不同。</li>
+<li>重新计算索引的 Cardinality 值操作<ul>
+<li>执行SQL语句 ANALYZE TABLE、SHOW TABLE STATUS、SHOW INDEX</li>
+<li>访问 INFORMATION_SCHEMA 架构下的表 TABLES 和 STATISTICS</li>
+</ul>
+</li>
+</ul>
+<h2 id="B-树索引的使用"><a href="#B-树索引的使用" class="headerlink" title="B+ 树索引的使用"></a>B+ 树索引的使用</h2><h3 id="联合索引"><a href="#联合索引" class="headerlink" title="联合索引"></a>联合索引</h3><p>联合索引本质上也是一棵 B+ 树，如图，索引 (a, b) 的叶子节点会保证在 a 的顺序的前提下保证 b 的顺序。所以，对于单个的 a 查询是可以走 (a, b) 索引的，但是单个 b 查询不行。<br><img src="https://tva1.sinaimg.cn/large/0082zybpgy1gbw940ixz5j30pq08e0ud.jpg" alt="img"><br>同时，联合索引的第二个键值也是进行了排序处理的。</p>
+<h3 id="覆盖索引"><a href="#覆盖索引" class="headerlink" title="覆盖索引"></a>覆盖索引</h3><p>覆盖索引就是从辅助索引中就可以得到查询记录。好处就是不需要再去聚集索引中查找整行的数据，可以减少IO操作。<br>注意：执行以下操作是可以使用覆盖索引 (userid, buy_date) 的：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select count(*) from buy_log where buy_date&gt;&#39;2011-01-01&#39; and buy_date&lt;&#39;2011-12-01&#39;;</span><br></pre></td></tr></table></figure>
+
+<p>这里只用到了 buy_date 进行查询，但是因为是统计操作，所以可以用到覆盖索引。</p>
+<h3 id="优化器选择不使用索引的情况"><a href="#优化器选择不使用索引的情况" class="headerlink" title="优化器选择不使用索引的情况"></a>优化器选择不使用索引的情况</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select count(*) from order_details where orderid&gt;1000 and orderid&lt;10000;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>客户需要查询整行数据，如果使用orderid作为索引不能覆盖所有信息，所以在使用二级索引orderid查询出主键之后，还是需要在聚集索引中根据主键查找整行数据。</li>
+<li>如果要求访问的数据流很小，则优化器还是会选择辅助索引，但是当访问的数据占整个表中数据的蛮大一部分时(一般为20%左右)，优化器会通过聚集索引来查找数据。（原因是顺序读要远远快于离散读）</li>
+</ul>
+<h3 id="MRR-优化-amp-ICP-优化"><a href="#MRR-优化-amp-ICP-优化" class="headerlink" title="MRR 优化 &amp; ICP 优化"></a>MRR 优化 &amp; ICP 优化</h3><p>MMR 和 ICP 都是MySQL 5.6 开始支持的索引优化方式。</p>
+<p><strong>MMR（Multi-Range Read）适用于 range、ref、eq_ref类型查询，好处是：</strong></p>
+<ol>
+<li>MRR 是数据访问变得较为顺序</li>
+<li>减少缓冲池中页被替换次数</li>
+<li>批量处理对键值的查询操作</li>
+</ol>
+<p><strong>ICP（Index Condition Pushdown）原理：</strong><br>支持 ICP 之后，MySQL 数据库会在取出索引的同时，判断是否可以进行 WHERE 条件的过滤，也就是将 WHERE 的部分过滤操作放在了储存引擎层。<br>例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">select * from people</span><br><span class="line">    where zopcode &#x3D; &#39;311300&#39;</span><br><span class="line">    and lastname like &#39;%truni%&#39;</span><br><span class="line">    and address like &#39;%Main street%&#39;;</span><br></pre></td></tr></table></figure>
+
+<p>对于上述语句，若不支持 ICP 优化，数据库需要先通过索引取出所有 zipcode 等于 311300 的记录，然后再过滤 where 之后的 2 个条件。若支持 ICP 优化，数据库可以在索引取出时，就进行 where 条件的过滤，然后去获取记录。</p>
+<h2 id="全文检索"><a href="#全文检索" class="headerlink" title="全文检索"></a>全文检索</h2><p>对于以下语句，B+树索引是可以通过前缀索引进行查找的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from blog where content like &#39;xxx%&#39;;</span><br></pre></td></tr></table></figure>
+
+<p>但是在更多情况下用户需要查询的内容是包含某单词的，如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from blog where content like &#39;%xxx%&#39;;</span><br></pre></td></tr></table></figure>
+
+<p>这样的查询B+树索引就不能很好的完成工作。</p>
+<p>全文检索是将储存于数据库中的整本书或整篇文章中的任意内容信息查找出来的技术。InnoDB 1.2.x 版本开始，InnoDB 开始支持全文检索。</p>
+<h3 id="倒排索引"><a href="#倒排索引" class="headerlink" title="倒排索引"></a>倒排索引</h3><p>倒排索引和B+树索引一样，也是一种索引结构。它在辅助表中储存了单词和单词自身在一个或多个文档中所在的位置之间的映射。有2种表现形式：</p>
+<ol>
+<li>inverted file index，表现形式为{单词，单词所在的文档ID}</li>
+<li>full inverted index，表现形式为{单词，(单词所在的文档ID，具体在文档中的位置)}<br>例子：</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">具体实例，假设有三个文档</span><br><span class="line">T0 &#x3D; &quot;it is what it is&quot;</span><br><span class="line">T1 &#x3D; &quot;what is it&quot;</span><br><span class="line">T2 &#x3D; &quot;it is a banana&quot;</span><br><span class="line">采用inverted file index方式结果</span><br><span class="line">&quot;a&quot;:      &#123;2&#125;</span><br><span class="line">&quot;banana&quot;: &#123;2&#125;</span><br><span class="line">&quot;is&quot;:     &#123;0, 1, 2&#125;</span><br><span class="line">&quot;it&quot;:     &#123;0, 1, 2&#125;</span><br><span class="line">&quot;what&quot;:   &#123;0, 1&#125;</span><br><span class="line">采用full inverted index方式结果</span><br><span class="line">&quot;a&quot;:      &#123;(2, 2)&#125;</span><br><span class="line">&quot;banana&quot;: &#123;(2, 3)&#125;</span><br><span class="line">&quot;is&quot;:     &#123;(0, 1), (0, 4), (1, 1), (2, 1)&#125;</span><br><span class="line">&quot;it&quot;:     &#123;(0, 0), (0, 3), (1, 2), (2, 0)&#125;</span><br><span class="line">&quot;what&quot;:   &#123;(0, 2), (1, 0)&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>InnoDB 支持的全文检索技术采用的就是 full inverted index 方式</strong></p>
+<p><strong>全文检索常用函数</strong></p>
+<ol>
+<li>Natural Language</li>
+<li>Boolean</li>
+<li>Query Expansion</li>
 </ol>
 
       
