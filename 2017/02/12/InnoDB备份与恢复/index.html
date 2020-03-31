@@ -46,21 +46,21 @@
   };
 </script>
 
-  <meta name="description" content="date: 2020-01-12 15:54:03 备份与恢复备份方法根据备份的方法不同可以分为：  Hot Backup（热备份）1数据库运行中直接备份，对正在运行的数据库操作没有任何影响。 Cold Backup（冷备份）在数据库停止的情况下备份，冷备只需要复制相关的数据库物理文件（frm文件、共享空间文件、独立表空间文件–*.ibd、重做日志文件）即可。 Warm Backup（温备份）也是">
+  <meta name="description" content="备份与恢复备份方法根据备份的方法不同可以分为：  Hot Backup（热备份）1数据库运行中直接备份，对正在运行的数据库操作没有任何影响。 Cold Backup（冷备份）在数据库停止的情况下备份，冷备只需要复制相关的数据库物理文件（frm文件、共享空间文件、独立表空间文件–*.ibd、重做日志文件）即可。 Warm Backup（温备份）也是在数据库运行中进行，但是对当前数据库会有所影响，如加">
 <meta property="og:type" content="article">
 <meta property="og:title" content="InnoDB备份与恢复">
-<meta property="og:url" content="http://yoursite.com/2020/03/29/InnoDB%E5%A4%87%E4%BB%BD%E4%B8%8E%E6%81%A2%E5%A4%8D/index.html">
+<meta property="og:url" content="http://yoursite.com/2017/02/12/InnoDB%E5%A4%87%E4%BB%BD%E4%B8%8E%E6%81%A2%E5%A4%8D/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="date: 2020-01-12 15:54:03 备份与恢复备份方法根据备份的方法不同可以分为：  Hot Backup（热备份）1数据库运行中直接备份，对正在运行的数据库操作没有任何影响。 Cold Backup（冷备份）在数据库停止的情况下备份，冷备只需要复制相关的数据库物理文件（frm文件、共享空间文件、独立表空间文件–*.ibd、重做日志文件）即可。 Warm Backup（温备份）也是">
+<meta property="og:description" content="备份与恢复备份方法根据备份的方法不同可以分为：  Hot Backup（热备份）1数据库运行中直接备份，对正在运行的数据库操作没有任何影响。 Cold Backup（冷备份）在数据库停止的情况下备份，冷备只需要复制相关的数据库物理文件（frm文件、共享空间文件、独立表空间文件–*.ibd、重做日志文件）即可。 Warm Backup（温备份）也是在数据库运行中进行，但是对当前数据库会有所影响，如加">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://tva1.sinaimg.cn/large/0082zybply1gc6dv33jegj31a60r6til.jpg">
-<meta property="article:published_time" content="2020-03-29T12:42:37.153Z">
-<meta property="article:modified_time" content="2020-03-31T12:12:54.973Z">
+<meta property="article:published_time" content="2017-02-12T14:22:27.000Z">
+<meta property="article:modified_time" content="2020-03-31T12:15:21.459Z">
 <meta property="article:author" content="John Doe">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://tva1.sinaimg.cn/large/0082zybply1gc6dv33jegj31a60r6til.jpg">
 
-<link rel="canonical" href="http://yoursite.com/2020/03/29/InnoDB%E5%A4%87%E4%BB%BD%E4%B8%8E%E6%81%A2%E5%A4%8D/">
+<link rel="canonical" href="http://yoursite.com/2017/02/12/InnoDB%E5%A4%87%E4%BB%BD%E4%B8%8E%E6%81%A2%E5%A4%8D/">
 
 
 <script id="page-configurations">
@@ -171,7 +171,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/29/InnoDB%E5%A4%87%E4%BB%BD%E4%B8%8E%E6%81%A2%E5%A4%8D/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/02/12/InnoDB%E5%A4%87%E4%BB%BD%E4%B8%8E%E6%81%A2%E5%A4%8D/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -194,14 +194,14 @@
               </span>
               <span class="post-meta-item-text">Posted on</span>
 
-              <time title="Created: 2020-03-29 20:42:37" itemprop="dateCreated datePublished" datetime="2020-03-29T20:42:37+08:00">2020-03-29</time>
+              <time title="Created: 2017-02-12 22:22:27" itemprop="dateCreated datePublished" datetime="2017-02-12T22:22:27+08:00">2017-02-12</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-03-31 20:12:54" itemprop="dateModified" datetime="2020-03-31T20:12:54+08:00">2020-03-31</time>
+                <time title="Modified: 2020-03-31 20:15:21" itemprop="dateModified" datetime="2020-03-31T20:15:21+08:00">2020-03-31</time>
               </span>
 
           
@@ -215,8 +215,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>date: 2020-01-12 15:54:03</p>
-<h1 id="备份与恢复"><a href="#备份与恢复" class="headerlink" title="备份与恢复"></a>备份与恢复</h1><h2 id="备份方法"><a href="#备份方法" class="headerlink" title="备份方法"></a>备份方法</h2><p><strong>根据备份的方法不同可以分为：</strong></p>
+        <h1 id="备份与恢复"><a href="#备份与恢复" class="headerlink" title="备份与恢复"></a>备份与恢复</h1><h2 id="备份方法"><a href="#备份方法" class="headerlink" title="备份方法"></a>备份方法</h2><p><strong>根据备份的方法不同可以分为：</strong></p>
 <ol>
 <li>Hot Backup（热备份）1<br>数据库运行中直接备份，对正在运行的数据库操作没有任何影响。</li>
 <li>Cold Backup（冷备份）<br>在数据库停止的情况下备份，冷备只需要复制相关的数据库物理文件（frm文件、共享空间文件、独立表空间文件–*.ibd、重做日志文件）即可。</li>
@@ -262,13 +261,10 @@
 
         
     <div class="post-nav">
+      <div class="post-nav-item"></div>
       <div class="post-nav-item">
-    <a href="/2020/03/29/InnoDB%E4%BA%8B%E5%8A%A1/" rel="prev" title="InnoDB事务">
-      <i class="fa fa-chevron-left"></i> InnoDB事务
-    </a></div>
-      <div class="post-nav-item">
-    <a href="/2020/03/29/%E5%9B%BE%E8%A7%A3%20TCP:IP%20%E6%91%98%E8%A6%81/" rel="next" title="图解 TCP:IP 摘要">
-      图解 TCP:IP 摘要 <i class="fa fa-chevron-right"></i>
+    <a href="/2020/02/04/Redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E5%AF%B9%E8%B1%A1/" rel="next" title="Redis数据结构与对象">
+      Redis数据结构与对象 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>

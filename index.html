@@ -655,103 +655,6 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/29/InnoDB%E5%A4%87%E4%BB%BD%E4%B8%8E%E6%81%A2%E5%A4%8D/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/29/InnoDB%E5%A4%87%E4%BB%BD%E4%B8%8E%E6%81%A2%E5%A4%8D/" class="post-title-link" itemprop="url">InnoDB备份与恢复</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2020-03-29 20:42:37" itemprop="dateCreated datePublished" datetime="2020-03-29T20:42:37+08:00">2020-03-29</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-03-31 20:12:54" itemprop="dateModified" datetime="2020-03-31T20:12:54+08:00">2020-03-31</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>date: 2020-01-12 15:54:03</p>
-<h1 id="备份与恢复"><a href="#备份与恢复" class="headerlink" title="备份与恢复"></a>备份与恢复</h1><h2 id="备份方法"><a href="#备份方法" class="headerlink" title="备份方法"></a>备份方法</h2><p><strong>根据备份的方法不同可以分为：</strong></p>
-<ol>
-<li>Hot Backup（热备份）1<br>数据库运行中直接备份，对正在运行的数据库操作没有任何影响。</li>
-<li>Cold Backup（冷备份）<br>在数据库停止的情况下备份，冷备只需要复制相关的数据库物理文件（frm文件、共享空间文件、独立表空间文件–*.ibd、重做日志文件）即可。</li>
-<li>Warm Backup（温备份）<br>也是在数据库运行中进行，但是对当前数据库会有所影响，如加全局锁以保证一致性。</li>
-</ol>
-<p><strong>根据备份后文件的内容可以分为：</strong></p>
-<ol>
-<li>逻辑备份<br>内容一般为一条条 SQL，或者是表内实际数据。（如mysqldump、select * into outfile）可以观察到导出文件内容，适用于数据库升级以及迁移，但是恢复所需时间长。</li>
-<li>裸文件备份<br>指复制数据库的物理文件，可以在数据库运行或者停止时复制。（ibbackup、xtrabackup）恢复时间短。</li>
-</ol>
-<p><strong>根据备份数据库的内容可以分为：</strong></p>
-<ol>
-<li>完全备份</li>
-<li>增量备份</li>
-<li>日志备份</li>
-</ol>
-<p>对 MySQL 数据库的二进制日志的备份，通过对一个完全备份进行二进制日志重做（replay）来完成恢复工作。</p>
-<h2 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h2><h3 id="热备"><a href="#热备" class="headerlink" title="热备"></a>热备</h3><p><strong>热备原理</strong></p>
-<ol>
-<li>记录备份开始时，InnoDB 存储引擎重做日志文件检查点的 LSN。</li>
-<li>复制共享表空间文件以及独立表空间文件。（所有数据）</li>
-<li>记录复制完空间文件后，InnoDB 存储引擎重做文件检查点的 LSN。</li>
-<li>复制在备份时产生的重做日志。</li>
-</ol>
-<h3 id="复制（replication）"><a href="#复制（replication）" class="headerlink" title="复制（replication）"></a>复制（replication）</h3><p><strong>复制原理</strong></p>
-<ol>
-<li>主服务器 master 把数据更改记录到二进制文件日志 binlog 中。</li>
-<li>从服务器 slave 把主服务器的二进制文件复制到自己的中继日志 relay log 中</li>
-<li>从服务器重做中继日志中的日志，把更改应用到自己的数据库上，以达到数据库最终的一致性。</li>
-</ol>
-<p><img src="https://tva1.sinaimg.cn/large/0082zybply1gc6dv33jegj31a60r6til.jpg" alt="img"></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="en">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/29/InnoDB%E4%BA%8B%E5%8A%A1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1741,6 +1644,143 @@
 <li>x 节点的其中一个从节点会竞选成为新的主节点（每个主节点都有投票权，当超过半数的主节点吧支持票投给其中一个从节点，那这个从节点就被选举为新的主节点）</li>
 </ol>
 <h4 id="消息"><a href="#消息" class="headerlink" title="消息"></a>消息</h4><p>集群中的节点通过发送和接收消息来进行通信，常见的消息包括 MEET、PING、PONG、PUBLISH、FAIL 五种。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbh6rhjb7fj30u00wtk0a.jpg" alt="img"></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/29/Redis%E5%8D%95%E6%9C%BA%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AE%9E%E7%8E%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/03/29/Redis%E5%8D%95%E6%9C%BA%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AE%9E%E7%8E%B0/" class="post-title-link" itemprop="url">Redis单机数据库的实现</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2020-03-29 20:35:08 / Modified: 20:35:11" itemprop="dateCreated datePublished" datetime="2020-03-29T20:35:08+08:00">2020-03-29</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="数据库"><a href="#数据库" class="headerlink" title="数据库"></a>数据库</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">redisServer</span> &#123;</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// 一个数组，保存着服务器中的所有数据库</span></span><br><span class="line">    redisDb *db;</span><br><span class="line">    <span class="comment">// 服务器的数据库数量</span></span><br><span class="line">    <span class="keyword">int</span> dbnum;</span><br><span class="line">    <span class="comment">// 数据库键空间，保存着数据库中的所有键值对</span></span><br><span class="line">    dict *dict;</span><br><span class="line">    <span class="comment">// 过期字典，保存着键的过期时间</span></span><br><span class="line">    dict *expires;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>服务器数据库示例</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbaa3ek7d9j30mk0943z4.jpg" alt="img"></p>
+<p><strong>数据库切换</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set msg &quot;hello world&quot;</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; get msg</span><br><span class="line">&quot;hello world&quot;</span><br><span class="line">127.0.0.1:6379&gt; select 2</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379[2]&gt; get msg</span><br><span class="line">(nil)</span><br></pre></td></tr></table></figure>
+
+<p><strong>数据库键空间</strong><br>RedisDb 结构的 dict 字典保存了数据库中的所有键值对，我们将这个字典成为键空间（key space）<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbaaj7lyftj310g0kkae2.jpg" alt="img"></p>
+<p>除了添加、删除、更新、取值操作外，清空数据库 FLUSHDB 命令，随机返回数据库某键 RANDOMKEY 命令，返回数据库键数 DBSIZE，包括 EXISTS、RENAME、KEYS 等命令都是通过对键空间进行操作实现的。</p>
+<p><strong>过期时间</strong><br>redisDb 结构的 expires 字典保存了数据库所有键的过期时间，这个字典被称为过期字典：</p>
+<ul>
+<li>过期字典的键是一个指针，指向键空间中的某个键对象</li>
+<li>过期字典的值是一个long long类型的整数，保存了过期时间–一个毫秒精确度的 UNIX 时间戳</li>
+</ul>
+<p><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbaazh9t4mj31120pmag4.jpg" alt="img"></p>
+<p><strong>过期键删除策略</strong></p>
+<ul>
+<li>定时删除：创建一个定时器，键过期时立即对键执行删除操作。（对内存友好，对 CPU 不友好）–实际不用这个策略</li>
+<li>惰性删除：在获取键时，如果没过期则获取键，过期则删除键。（对 CPU 友好，对内存不友好）</li>
+<li>定期删除：隔一段时间检查键，删除过期键。（合理设置执行时长和频率）</li>
+</ul>
+<p>惰性删除策略实现<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbb4guvtnyj30yy0gs42p.jpg" alt="img"></p>
+<p><strong>RDB 和 AOF 过期键处理</strong></p>
+<ul>
+<li>RDB：执行 SAVE 命令或 BGSAVE 命令创建一个 RDB 文件时，会对数据库中的键进行检查，过期键不会保存在这个 RDB 文件中。</li>
+<li>AOF：当过期键被惰性删除或定期删除后，程序会向 AOF 文件追加（append）一条 DEL 命令，显式记录该键已被删除。</li>
+<li>RDB 和 AOF 在从服务器中运行时，会保存所有过期键，他们只会同步主服务器的文件。（主服务器同步 RDB 文件会清空从服务器；AOF 文件从服务器接收主服务器发来的 DEL 命令删除过期键）</li>
+</ul>
+<h2 id="RDB-持久化"><a href="#RDB-持久化" class="headerlink" title="RDB 持久化"></a>RDB 持久化</h2><p>我们将服务器中的非空数据库以及它们的键值对统称为数据库状态。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbbfiwvgtij30hq07amy2.jpg" alt="img"><br><strong>Redis 提供了 RDB 持久化功能，将 Redis 在内存中的数据库状态保存在磁盘里，避免数据丢失。</strong><br>RDB 持久化功能所生成的 RDB 文件是一个经过压缩的二进制文件，通过该文件可以还原生成 RDB 文件时的数据库状态。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbbflah8vuj30w206kabq.jpg" alt="img"></p>
+<p><strong>RDB 文件的创建与载入</strong><br>SAVE 和 BGSAVE 都可以生产 RDB 文件<br>SAVE 会阻塞 Redis 服务器进程；BGSAVE 会派生出一个子进程负责创建 RDB 文件，父进程继续处理命令请求。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; save &#x2F;&#x2F; 等待直到 RDB 文件创建完毕</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; bgsave &#x2F;&#x2F; 派生子进程，由子进程创建 RDB 文件</span><br><span class="line">Background saving started</span><br></pre></td></tr></table></figure>
+
+<p>若服务器开启了 AOF 持久化功能，服务器会优先使用 AFO 文件来还原数据。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbbgb845thj30ec0ccjsx.jpg" alt="img"><br>SAVA、BGSAVA、BGREWRITEAOF 三个命令不能同时处于运行状态。</p>
+<p>Redis 载入工作会在服务器启动时自动执行。服务器在载入 RDB 文件期间，会一直处于阻塞状态，直到载入工作完成为止。</p>
+<p><strong>自动间隔性保存</strong><br>Redis 服务器启动时，用户可以通过制定配置文件或者传日启动参数设置 save 选项。<br>save 涉及到的参数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">redisServer</span> &#123;</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// 记录了保存条件的数组</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">saveparam</span> *<span class="title">saveparams</span>;</span></span><br><span class="line">    <span class="comment">// 修改计数器，记录了距离上次成功保存后，服务器进行了几次修改</span></span><br><span class="line">    <span class="keyword">long</span> <span class="keyword">long</span> dirty;</span><br><span class="line">    <span class="comment">// 上次执行保存的时间</span></span><br><span class="line">    <span class="keyword">time_t</span> lastsave;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br><span class="line">save <span class="number">900</span> <span class="number">1</span>    <span class="comment">// 900秒内对数据库至少进行1次修改</span></span><br><span class="line">save <span class="number">300</span> <span class="number">10</span>   <span class="comment">// 300秒内对数据库至少进行10次修改</span></span><br><span class="line">save <span class="number">60</span> <span class="number">10000</span> <span class="comment">// 60秒内对数据库至少进行10000次修改</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbbgxdojcej30r60beac2.jpg" alt="img"></p>
+<p><strong>RDB 文件结构</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbbkawjkzpj30jy018wen.jpg" alt="img"><br><em>大写单词表示常量，小写单词代表变量和数据</em><br>REDIS：载入文件时判断是否为 RDB 文件<br>EOF：表示文件正文内容结束</p>
+<p>带有2个数据库的完整 RDB 文件<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbbkwo6irxj312y05mgn6.jpg" alt="img"><br>ms：键值对过期的时间戳</p>
+<p><strong>value的编码</strong><br>REDIS_ENCODING_RAW：<br>字符串长度&lt;=20字节，原样保存；字符串长度&gt;20字节，压缩保存<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbblh4oxoqj314u02w75d.jpg" alt="img"></p>
+<h2 id="AOF-持久化"><a href="#AOF-持久化" class="headerlink" title="AOF 持久化"></a>AOF 持久化</h2><p>RDB 持久化通过保存数据库中的键值对来记录数据库状态不同，AOF（Append Only File）持久化是通过保存 Redis 服务器所执行的写命令来记录数据库状态的。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbcdykilq4j30iq04w0td.jpg" alt="img"></p>
+<p><strong>AOF 持久化实现</strong><br>实现分为追加（append）、文件写入、文件同步（sync）三步。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">redisServer</span> &#123;</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// AOF 缓冲区</span></span><br><span class="line">    sds aof_buf;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>命令追加：服务器执行完写命令，会以协议格式将被执行命令追加到 aof_buf 末尾。</p>
+<p><strong>AOF 文件的写入与同步</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">def eventLoop():</span><br><span class="line">    while True:</span><br><span class="line">    &#x2F;&#x2F; 处理文件时间，接受命令请求以及发送命令回复</span><br><span class="line">    &#x2F;&#x2F; 处理命令请求时可能会有新内容被追加到 aof_buf 缓冲区中</span><br><span class="line">    processFIleEvents()</span><br><span class="line">    &#x2F;&#x2F; 处理时间时间</span><br><span class="line">    processTimeEvents()</span><br><span class="line">    &#x2F;&#x2F; 考虑是否要讲 aof_buf 中的内容写入和保存到 AOF 文件里面</span><br><span class="line">    flushAppendOnlyFile()</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbci6ibejyj311m0bmjvv.jpg" alt="img"></p>
+<p><strong>AOF 文件的载入与数据还原</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbcica4duwj30hy0ew76f.jpg" alt="img"></p>
+<p><strong>AOF 重写</strong><br>AOF 重写是通过读取数据库中的键值对来实现的，和现有的 AOF 文件无关。</p>
+<p>在执行 BGREWRITEAOF 命令时，Reis 服务器会维护一个 AOF 重写缓冲区，该缓冲区会在子进程创建新 AOF 文件期间，记录服务器执行的所有写命令。当子进程完成创建新 AOF 文件的工作之后，服务器会将重写缓冲区中的所有内容追加到新 AOF 文件的末尾，使得新旧两个 AOF 文件所保存的数据库状态一致。最后，服务器用新的 AOF 文件替换旧的 AOF 文件，以此来完成 AOF 文件重写操作。</p>
+<p>例子：<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbcj9lzxmtj311k0igwjq.jpg" alt="img"></p>
+<h2 id="事件"><a href="#事件" class="headerlink" title="事件"></a>事件</h2><p>事件分为文件事件和时间事件。</p>
+<p><strong>文件事件</strong><br>文件事件分为 AE_READABLE 事件（读事件） 和 AE_WRITABLE写事（写事件）<br>文件事件是对套接字（socket）操作的抽象：每次套接字变为可应答（acceptable）、可写（writable）或可读（readable）时，相应的文件事件就会产生。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbcldb99msj30pq0i2n0r.jpg" alt="img"></p>
+<p><strong>时间事件</strong><br>时间事件分为定时事件和周期性事件</p>
+<p>服务器将所有时间事件都放在一个无序链表中，时间事件执行器运行时，它遍历整个链表，查找所有已到达的时间事件，并调用相应的时间处理器。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbcmw5aq1jj30vq0bwdit.jpg" alt="img"></p>
+<p><strong>severCron 函数</strong><br><em>默认100ms执行一次</em></p>
+<ul>
+<li>更新服务器的各类统计信息，比如时间、内存占用、数据库占用情况等</li>
+<li>清理数据库中的过期键值对。</li>
+<li>关闭和清理连接失效的客户端。</li>
+<li>尝试进行 AOF 或 RDB 持久化操作。</li>
+<li>如果服务器是主服务器，那么对从服务器进行定期同步。</li>
+<li>如果处于集群模式，对集群进行定期同步和连接测试。</li>
+<li>管理客户端资源和数据库状态</li>
+</ul>
+<p>时间事件和文件事件之间是合作关系，服务器会轮流处理这两种事件，并且处理时间的过程中也不会进行抢占；因为时间事件会在文件事件后执行，所以时间事件实际处理时间会比设定到达的时间稍微晚一些。</p>
+<h2 id="客户端"><a href="#客户端" class="headerlink" title="客户端"></a>客户端</h2><p>部分重要的参数，加 * 的是我的涵义注释，/* 是举例子</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">redisClient</span> &#123;</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// 套接字描述符</span></span><br><span class="line">    <span class="comment">// * fd=-1为伪客户端（来源AOF文件或Lua脚本，不是网络请求不需要套接字），fd&gt;-1为普通客户端</span></span><br><span class="line">    <span class="keyword">int</span> fd;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 当前正在使用的数据库</span></span><br><span class="line">    redisDb *db;</span><br><span class="line">    <span class="comment">// 当前正在使用的数据库的 id （号码）</span></span><br><span class="line">    <span class="keyword">int</span> dictid;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 客户端的名字</span></span><br><span class="line">    <span class="comment">// * 默认是没有名字的，没有设置名字name指向null</span></span><br><span class="line">    robj *name;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 查询缓冲区</span></span><br><span class="line">    <span class="comment">// * 用于保存客户端发送的命令</span></span><br><span class="line">    sds querybuf;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 参数数量</span></span><br><span class="line">    <span class="comment">// * 记录argv的长度</span></span><br><span class="line">    <span class="keyword">int</span> argc;</span><br><span class="line">    <span class="comment">// 参数对象数组</span></span><br><span class="line">    <span class="comment">// * argv是一个数组，如argv[0]是要执行的命令，服务器根据argv[0]的值在命令表里查找命令实现函数</span></span><br><span class="line">    robj **argv;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// * 输出缓冲区分为固定大小缓冲区和可变大小缓冲区两种</span></span><br><span class="line">    <span class="comment">// * 固定大小缓冲区由buf和bufpos组成</span></span><br><span class="line">    <span class="comment">// 回复缓冲区</span></span><br><span class="line">    <span class="keyword">char</span> buf[REDIS_REPLY_CHUNK_BYTES];</span><br><span class="line">    <span class="comment">// 回复偏移量，记录buf数组已使用的字节数</span></span><br><span class="line">    <span class="keyword">int</span> bufpos;</span><br><span class="line">    <span class="comment">// 回复链表</span></span><br><span class="line">    <span class="comment">// * 当buf空间用完了，服务器会开始使用可变大小缓冲区，变大小缓冲区由reply链表和一个或多个字符串对象组成</span></span><br><span class="line">    <span class="built_in">list</span> *reply;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 创建客户端的时间</span></span><br><span class="line">    <span class="keyword">time_t</span> ctime;</span><br><span class="line">    <span class="comment">// 客户端最后一次和服务器互动的时间</span></span><br><span class="line">    <span class="comment">// * 可以用于计算空转（idel）时间 = now - lastinteraction</span></span><br><span class="line">    <span class="keyword">time_t</span> lastinteraction;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 客户端的输出缓冲区超过软性限制的时间</span></span><br><span class="line">    <span class="comment">// * 在一定时间内输出缓冲区大小一直超出软性限制，服务器将关闭客户端（一超出硬性限制就会关闭）</span></span><br><span class="line">    <span class="keyword">time_t</span> obuf_soft_limit_reached_time;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 客户端状态标志</span></span><br><span class="line">    <span class="comment">// * flags记录客户端角色（role）和客户端目前所处的状态</span></span><br><span class="line">    <span class="keyword">int</span> flags;              <span class="comment">/* REDIS_SLAVE | REDIS_MONITOR | REDIS_MULTI ... */</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 当 server.requirepass 不为 NULL 时</span></span><br><span class="line">    <span class="comment">// 代表认证的状态</span></span><br><span class="line">    <span class="comment">// 0 代表未认证， 1 代表已认证</span></span><br><span class="line">    <span class="keyword">int</span> authenticated;</span><br><span class="line">    ...</span><br><span class="line">&#125; redisClient;</span><br></pre></td></tr></table></figure>
+
+<h2 id="服务器"><a href="#服务器" class="headerlink" title="服务器"></a>服务器</h2><p><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbdpxgpivej31em03ejt1.jpg" alt="img"></p>
+<p>命令执行器工作：</p>
+<ol>
+<li>查找命令实现：根据客户端状态的argv[0]参数，在命令表中查找参数所指定的命令，并将找到的命令保存到客户状态的cmd属性中。</li>
+<li>执行预备操作</li>
+<li>调用命令的实现函数</li>
+<li>执行后续工作</li>
+</ol>
 
       
     </div>
