@@ -337,205 +337,6 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/29/%E7%AE%97%E6%B3%95%E5%AF%BC%E8%AE%BA-%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/29/%E7%AE%97%E6%B3%95%E5%AF%BC%E8%AE%BA-%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/" class="post-title-link" itemprop="url">算法导论-动态规划</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2020-03-29 20:47:03" itemprop="dateCreated datePublished" datetime="2020-03-29T20:47:03+08:00">2020-03-29</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="分治策略（divide-and-conquer）"><a href="#分治策略（divide-and-conquer）" class="headerlink" title="分治策略（divide and conquer）"></a>分治策略（divide and conquer）</h1><ol>
-<li>分解（divide）步骤将问题划分为一些子问题，子问题的形式与原问题一样，只是规模更小。</li>
-<li>解决（conquer）步骤递归地解出子问题。如果子问题的规模足够小，则停止递归，直接求解。</li>
-<li>合并（combine）步骤将子问题的解组合成原问题的解。</li>
-</ol>
-<ul>
-<li>递归情况：当子问题足够大，需要递归求解时</li>
-<li>基本情况：当子问题变得足够小，不再需要递归，我们说递归已经“触底”。</li>
-</ul>
-<hr>
-<p>例子（merge-sort）<br><img src="https://tva1.sinaimg.cn/large/006y8mN6ly1g864fs2v2cj31360u00z8.jpg" alt="img"><br><img src="https://tva1.sinaimg.cn/large/006y8mN6ly1g85yaihe50j30n804mdh3.jpg" alt="img"></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">merge_sort</span><span class="params">(<span class="keyword">int</span>[] arr)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span>[] tmp = <span class="keyword">new</span> <span class="keyword">int</span>[arr.length];</span><br><span class="line">    sub_merge_sort(arr, <span class="number">0</span>, arr.length - <span class="number">1</span>, tmp);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">sub_merge_sort</span><span class="params">(<span class="keyword">int</span>[] arr, <span class="keyword">int</span> left, <span class="keyword">int</span> right, <span class="keyword">int</span>[] tmp)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (left &lt; right) &#123;</span><br><span class="line">        <span class="keyword">int</span> mid = (left + right) / <span class="number">2</span>;</span><br><span class="line">        sub_merge_sort(arr, left, mid, tmp); <span class="comment">// 左边排序</span></span><br><span class="line">        sub_merge_sort(arr, mid + <span class="number">1</span>, right, tmp); <span class="comment">// 右边排序</span></span><br><span class="line">        merge(arr, left, mid, right, tmp); <span class="comment">// 整合</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">merge</span><span class="params">(<span class="keyword">int</span>[] arr, <span class="keyword">int</span> left, <span class="keyword">int</span> mid, <span class="keyword">int</span> right, <span class="keyword">int</span>[] tmp)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> i = left;</span><br><span class="line">    <span class="keyword">int</span> j = mid + <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">int</span> t = <span class="number">0</span>;</span><br><span class="line">    <span class="comment">// 左边从左到右和右边从左到右比大小，较小的存进临时数组</span></span><br><span class="line">    <span class="keyword">while</span> (i &lt;= mid &amp;&amp; j &lt;= right) &#123;</span><br><span class="line">        <span class="keyword">if</span> (arr[i] &lt; arr[j]) &#123;</span><br><span class="line">            tmp[t++] = arr[i++];</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            tmp[t++] = arr[j++];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 左边剩余的存进数组</span></span><br><span class="line">    <span class="keyword">while</span> (i &lt;= mid) &#123;</span><br><span class="line">        tmp[t++] = arr[i++];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 右边剩余的存进数组</span></span><br><span class="line">    <span class="keyword">while</span> (j &lt;= right) &#123;</span><br><span class="line">        tmp[t++] = arr[j++];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 用临时数据替换结果</span></span><br><span class="line">    t = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (left &lt;= right) &#123;</span><br><span class="line">        arr[left++] = tmp[t++];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="动态规划（dynamic-programming）"><a href="#动态规划（dynamic-programming）" class="headerlink" title="动态规划（dynamic programming）"></a>动态规划（dynamic programming）</h1><p>动态规划（DP）通常用来求解最优化问题（optimization problem）<br>这种问题可以有很多可行的解，每个解都有一个值，希望找到最优值（最大或最小）的解。称这样的解为问题的一个最优解（an optimal solution）,而不是最优解（the optimal solution）,因为可能有多个解都达到最优。</p>
-<hr>
-<h3 id="DP-VS-D-amp-C"><a href="#DP-VS-D-amp-C" class="headerlink" title="DP VS D&amp;C"></a>DP VS D&amp;C</h3><p>动态规划和分治相似，都是通过组合子问题的解来求解原问题。</p>
-<ul>
-<li>programming指的是一种表格法（按照一定的步骤来解决问题），而非编写计算机程序。</li>
-</ul>
-<p>D&amp;C</p>
-<ol>
-<li>把问题划分为互不相交的子问题</li>
-<li>递归求解子问题</li>
-<li>把解组合起来，求出原问题的解</li>
-</ol>
-<p>DP<br><strong>应用于子问题重叠的情况（子问题求解是递归进行的，将其划分为更小的子子问题</strong><br><strong>分治会做很多不需要的工作，反复求解公共子子问题；动态规划对每个子问题就求解一次，保存起来，避免了重复计算。</strong></p>
-<hr>
-<h3 id="DP设计"><a href="#DP设计" class="headerlink" title="DP设计"></a>DP设计</h3><ol>
-<li>刻画一个最优解的结构特征</li>
-<li>递归定义最优解的值</li>
-<li>计算最优解的值（自底向上或自顶向下）</li>
-<li>构造一个最优解（如只需要最优解的值而非解本身，则可忽略）</li>
-</ol>
-<hr>
-<h3 id="钢条切割问题"><a href="#钢条切割问题" class="headerlink" title="钢条切割问题"></a>钢条切割问题</h3><p><strong>背景</strong><br>长钢条切成短钢条出售，切割无成本，求最佳的切割方案</p>
-<p><strong>价格表</strong></p>
-<table>
-<thead>
-<tr>
-<th>长度 i<em>i</em></th>
-<th>1</th>
-<th>2</th>
-<th>3</th>
-<th>4</th>
-<th>5</th>
-<th>6</th>
-<th>7</th>
-<th>8</th>
-<th>9</th>
-<th>10</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>价格 Pi<em>P**i</em></td>
-<td>1</td>
-<td>5</td>
-<td>8</td>
-<td>9</td>
-<td>10</td>
-<td>17</td>
-<td>17</td>
-<td>20</td>
-<td>24</td>
-<td>30</td>
-</tr>
-</tbody></table>
-<p><strong>问题</strong><br>给定一段长度为n<em>n</em>英寸的钢条和一个价格表Pi(i=1,2,3,…)<em>P*<em>i</em>​(*i</em>=1,2,3,…)，求切割方案，使销售收益Rn<em>R*</em>n<em>​最大。注：若长度为n</em>n<em>英寸的钢条的价格Pn</em>P*<em>n</em>​足够大，最优解可能就是完全不需要切割。</p>
-<p><strong>例子</strong><br>i=4<em>i</em>=4；最大收益P2+P2=5+5=10<em>P</em>2​+<em>P</em>2​=5+5=10<br><img src="https://tva1.sinaimg.cn/large/006y8mN6ly1g86qp7r4wkj31ea0ccdmz.jpg" alt="img"><br>长度为n英寸的钢条共有2n−12<em>n</em>−1种不同切割方案，因为在距离钢条左端 i(i=1,2,…,n−1)<em>i</em>(<em>i</em>=1,2,…,<em>n</em>−1)英寸处，总是可以选择切割或者不切割。</p>
-<p>Cn−10+Cn−11+Cn−12+…+Cn−1n−2+Cn−1n−1=2n−1<em>C*</em>n<em>−10+</em>C<strong>n<em>−11+</em>C</strong>n<em>−12+…+</em>C<strong>n<em>−1</em>n<em>−2+</em>C</strong>n<em>−1</em>n<em>−1=2</em>n*−1</p>
-<p>二项式分布公式：</p>
-<p>(a+b)=∑k=0n(nk)akbn−k(<em>a</em>+<em>b</em>)<em>n</em>=<em>k</em>=0∑<em>n</em>(<em>n**k</em>)<em>a<strong>k</strong>b*<em>n</em>−*k</em></p>
-<p>a=b=1<em>a</em>=<em>b</em>=1</p>
-<p>2n=∑k=0n(nk)2<em>n</em>=<em>k</em>=0∑<em>n</em>(<em>n**k</em>)</p>
-<p>若一个最优解将钢条切割为k段（1≤k≤n），那么最优切割方案 n=i1+i2+…+ik<em>n</em>=<em>i</em>1+<em>i</em>2+…+<em>i**k</em><br>将钢条切割为长度分别为i1,i2,…,ik<em>i</em>1​,<em>i</em>2​,…,<em>i*</em>k<em>​的小段，得到的最大收益为 rn=pi1+pi2+…+pik</em>r<strong>n<em>​=</em>p</strong>i<em>1​​+</em>p<strong>i<em>2​​+…+</em>p</strong>i*<em>k</em>​​</p>
-<p><strong>观察法（最优收益值ri*r\</strong>i*）**<br>r1=1<em>r</em>1​=1,切割方案 1=11=1（无切割）<br>r2=5<em>r</em>2​=5,切割方案 2=22=2（无切割）<br>r3=8<em>r</em>3​=8,切割方案 3=33=3（无切割）<br>r4=10<em>r</em>4​=10,切割方案 4=2+24=2+2<br>r5=13<em>r</em>5​=13,切割方案 5=2+35=2+3<br>r6=17<em>r</em>6​=17,切割方案 6=66=6（无切割）<br>r7=18<em>r</em>7​=18,切割方案 7=1+67=1+6 或 7=2+2+37=2+2+3<br>r8=22<em>r</em>8​=22,切割方案 8=2+68=2+6<br>r9=25<em>r</em>9​=25,切割方案 9=3+69=3+6<br>r10=30<em>r</em>10​=30,切割方案 10=1010=10（无切割）</p>
-<p><strong>对于rn(n≥1)*r\</strong>n*(*n*≥1)，我们可以用更短的钢条的最优切割收益描述**</p>
-<p>rn=max(pn,r1+rn−1,r2+rn−2,…,rn−1+r1)<em>r**n</em>=<em>m<strong>a</strong>x</em>(<em>p**n</em>,<em>r</em>1+<em>r*</em>n<em>−1,</em>r<em>2+</em>r<strong>n<em>−2,…,</em>r</strong>n<em>−1+</em>r*1)</p>
-<ol>
-<li>pn<em>p*</em>n*对应不切割，直接售出整条钢条</li>
-<li>其他n−1<em>n</em>−1个参数对应另外n−1<em>n</em>−1种方案：把钢条切割成i<em>i</em>和n−i<em>n</em>−<em>i</em>两段，求解最优切割收益ri<em>r<strong>i<em>和rn−i</em>r</strong>n<em>−</em>i</em> (每段收益为两段的最优收益之和)</li>
-<li>由于无法预知哪种方案会获得最大收益，必须考察所有可能的i<em>i</em>，选取其中最大的。</li>
-</ol>
-<p><strong>更为简单的递归求解方法</strong></p>
-<ul>
-<li>将钢条从左边切下长度为i的一段</li>
-<li>只对右边的长度为n−i<em>n</em>−<em>i</em>的一段继续切割（递归求解）</li>
-<li>左边的一段不再切割</li>
-</ul>
-<p>得到的公式为<br>rn=1≤i≤n(pi+rn−i)<em>r*</em>n<em>​=1≤</em>i<em>≤</em>n<strong>m</strong>a<strong>x<em>​(</em>p</strong>i<em>​+</em>r<strong>n<em>−</em>i<em>​)<br>效果<br>原问题的最优解只包含一个相关子问题（rn−1</em>r</strong>n*−1​）</p>
-<p><strong>自顶向下递归实现</strong><br><em>伪代码</em></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">CUT-ROD(p,n)</span><br><span class="line">1   if n &#x3D;&#x3D; 0</span><br><span class="line">2      return 0</span><br><span class="line">3   q &#x3D; -∞</span><br><span class="line">4   for i &#x3D; 1 to n</span><br><span class="line">5      q &#x3D; max(q,p[o]+CUT-ROD(p,n-i))</span><br><span class="line">6   return q</span><br></pre></td></tr></table></figure>
-
-<p><em>Java实现</em></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">cutRod</span><span class="params">(<span class="keyword">int</span> length)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (length == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">int</span> res = Integer.MIN_VALUE;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;= length; i++) &#123;</span><br><span class="line">        res = Math.max(res, prices[i - <span class="number">1</span>] + cutRod(length - i));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>0～35的时间变化<br>长度为0的时间：0 ms; 最高价为0<br>长度为1的时间：0 ms; 最高价为1<br>长度为2的时间：0 ms; 最高价为5<br>长度为3的时间：0 ms; 最高价为8<br>长度为4的时间：0 ms; 最高价为10<br>长度为5的时间：0 ms; 最高价为13<br>长度为6的时间：0 ms; 最高价为17<br>长度为7的时间：0 ms; 最高价为18<br>长度为8的时间：0 ms; 最高价为22<br>长度为9的时间：0 ms; 最高价为25<br>长度为10的时间：0 ms; 最高价为30<br>长度为11的时间：1 ms; 最高价为31<br>长度为12的时间：0 ms; 最高价为35<br>长度为13的时间：0 ms; 最高价为38<br>长度为14的时间：0 ms; 最高价为40<br>长度为15的时间：1 ms; 最高价为43<br>长度为16的时间：1 ms; 最高价为47<br>长度为17的时间：1 ms; 最高价为48<br>长度为18的时间：2 ms; 最高价为52<br>长度为19的时间：3 ms; 最高价为55<br>长度为20的时间：4 ms; 最高价为60<br>长度为21的时间：8 ms; 最高价为61<br>长度为22的时间：19 ms; 最高价为65<br>长度为23的时间：38 ms; 最高价为68<br>长度为24的时间：84 ms; 最高价为70<br>长度为25的时间：218 ms; 最高价为73<br>长度为26的时间：217 ms; 最高价为77<br>长度为27的时间：490 ms; 最高价为78<br>长度为28的时间：786 ms; 最高价为82<br>长度为29的时间：1422 ms; 最高价为85<br>长度为30的时间：3086 ms; 最高价为90<br>长度为31的时间：6056 ms; 最高价为91<br>长度为32的时间：11799 ms; 最高价为95<br>长度为33的时间：22781 ms; 最高价为98<br>长度为34的时间：46577 ms; 最高价为100<br>长度为35的时间：94879 ms; 最高价为103<br><img src="https://tva1.sinaimg.cn/large/006y8mN6ly1g89kam0twyj30hs0buaal.jpg" alt="img"><br><strong>效率差的原因</strong><br>CUT-ROD反复地用相同的参数值对自身进行递归调用，即它反复求解相同的子问题<br><img src="https://tva1.sinaimg.cn/large/006y8mN6ly1g87c7fho9qj30tc0si403.jpg" alt="img"></p>
-<ul>
-<li>这棵递归调用树共有2n2<em>n</em>个结点，其中有2n−12<em>n</em>−1个叶结点<br>运行时间T(n)=2n<em>T</em>(<em>n</em>)=2<em>n</em>, 即CUT-ROD的运行时间为n的指数函数</li>
-</ul>
-<p><strong>思考&amp;改进</strong></p>
-<ol>
-<li>朴素递归算法之所以效率低是因为它反复求解相同的子问题</li>
-<li>动态规划按照求解顺序，对每个子问题只求解一次，并把结果保存下来</li>
-<li>随后再次需要此子问题的解，只需要查找保存的结果，不必重复计算</li>
-<li>用空间来换时间（time-memory-trade-off）</li>
-</ol>
-<hr>
-<p><strong>动态规划方法求解最优钢条切割问题</strong><br>实现动态规划的两种等价方法：</p>
-<ol>
-<li>带备忘的自顶向下法（top-down with memoization）<br>在自然递归形式编写的过程中，保存每个子问题的解<br>解决子问题时，先检查是否保存过此解<br>如果已存，直接返回保存的值<br>如果没存，常规方法结算子问题</li>
-<li>自底向上法（bottom-up method）<br>使得任何子问题的求解只依赖于更小的子问题的求解<br>将子问题按规模排序，由小到大顺序进行求解<br>求解某子问题，他所依赖的更小的子问题都已求解完毕<br>每个子问题只需要求解一次，当我们求解它时，它的前提问题都已求解完成</li>
-</ol>
-<ul>
-<li>两种方法得到的算法具有相同的渐进运行时间</li>
-</ul>
-<p><strong>加入了备忘机制的自顶向下实现</strong><br><em>伪代码</em></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">mem-cut-rod(p, n)</span><br><span class="line">1    let r[0…n] be a new array</span><br><span class="line">2    for i &#x3D; 0 to n</span><br><span class="line">3        r[i] &#x3D; -∞</span><br><span class="line">4    return mem-cut-rod-aux(p, n, r)</span><br><span class="line"></span><br><span class="line">mem-cut-rod-aux(p, n, r)</span><br><span class="line">1    if r[n] &gt;&#x3D; 0</span><br><span class="line">2        return r[n]</span><br><span class="line">3    if n &#x3D;&#x3D; 0</span><br><span class="line">4        q &#x3D; 0</span><br><span class="line">5    else </span><br><span class="line">6        q &#x3D; -∞</span><br><span class="line">7        for i &#x3D; 1 to n</span><br><span class="line">8            q &#x3D; max(q, p[i] + mem-cut-rod-aux(p, n-i, r))</span><br><span class="line">9    r[n] &#x3D; q</span><br><span class="line">10   return q</span><br></pre></td></tr></table></figure>
-
-<p><strong>第1行：检查所需值是否已知<br>第2行：直接返回保存的值<br>第3-7行：用通用的方法计算所需值q<br>第8行：将q存入r[n]<br>第9行：将其返回</strong></p>
-<p><strong>时间复杂度：O(n2*n*2)</strong><br>mem-cut-rod函数会对规模为1～n的子问题每个只求一次解，求解规模为n的子问题的时候mem-cut-rod-aux函数的第7行会循环调用n次，时间复杂度为O(n2<em>n</em>2)；1～n的子问题调用mem-cut-rod-aux时间复杂度之和也是O(n2<em>n</em>2)</p>
-<p><em>Java实现</em></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">cutRodMem</span><span class="params">(<span class="keyword">int</span> length)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span>[] r = <span class="keyword">new</span> <span class="keyword">int</span>[length + <span class="number">1</span>];</span><br><span class="line">    Arrays.fill(r, Integer.MIN_VALUE);</span><br><span class="line">    <span class="keyword">return</span> subCutRodMem(length, r);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">subCutRodMem</span><span class="params">(<span class="keyword">int</span> n, <span class="keyword">int</span>[] r)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 如果自问题已经解决过了，直接返回</span></span><br><span class="line">    <span class="keyword">if</span> (r[n] &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> r[n];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">int</span> res = Integer.MIN_VALUE;</span><br><span class="line">    <span class="comment">// 如果长度为0，直接返回0</span></span><br><span class="line">    <span class="comment">// 如果不为0，递归获取最大收益</span></span><br><span class="line">    <span class="keyword">if</span> (n == <span class="number">0</span>) &#123;</span><br><span class="line">        res = <span class="number">0</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;= n; i++) &#123;</span><br><span class="line">            res = Math.max(res, prices[i - <span class="number">1</span>] + subCutRodMem(n - i, r));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 储存最大收益</span></span><br><span class="line">    r[n] = res;</span><br><span class="line">    <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><strong>自底向上方法</strong><br><em>伪代码</em></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">bottom-up-cut-rod(p, n)</span><br><span class="line">1    let r[0…n] be a new array</span><br><span class="line">2    r[0] &#x3D; 0</span><br><span class="line">3    for j &#x3D; 1 to n</span><br><span class="line">4        q &#x3D; -∞</span><br><span class="line">5        for i &#x3D; 1 to j</span><br><span class="line">6            q &#x3D; max(q, p[i] + r[j-i])</span><br><span class="line">7        r[j] &#x3D; q</span><br><span class="line">8    return r[n]</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>若i&lt;j，则规模为i的子问题比规模为j的子问题更小。依次求解规模为j=0,1,2,…,n的子问题。</li>
-</ul>
-<p><strong>第2行：初始化r[0]，长度为0没有收益<br>第3-6行：对j=1,2,…,n按升序求解每个规模为j的子问题（直接访问数组元素r[j-i]来获得规模为j-i的子问题的解）<br>第7行：将规模为j的子问题的解存入r[j]<br>第8行：返回r[n]，即最优解rn*r\</strong>n*​**</p>
-<p><strong>时间复杂度：O(n2*n*2)</strong><br>代码的3～7行嵌套了2次for循环，所有时间复杂度为O(n2<em>n</em>2)</p>
-<p><em>Java实现</em></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">cutRodBottomUp</span><span class="params">(<span class="keyword">int</span> length)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span>[] r = <span class="keyword">new</span> <span class="keyword">int</span>[length + <span class="number">1</span>];</span><br><span class="line">    r[<span class="number">0</span>] = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">int</span> res= Integer.MIN_VALUE;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;= length; i++) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">1</span>; j &lt;= i; j++) &#123;</span><br><span class="line">            res = Math.max(res, prices[j-<span class="number">1</span>] + r[i-j]);</span><br><span class="line">        &#125;</span><br><span class="line">        r[i] = res;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> r[length];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>r[1]:<em>r</em>[1]:<br>=max(−∞,p[0]+r[0])=max(−∞,1+0)=1=<em>m<strong>a</strong>x</em>(−∞,<em>p</em>[0]+<em>r</em>[0])=<em>m<strong>a</strong>x</em>(−∞,1+0)=1<br>r[2]:<em>r</em>[2]:<br>=max(1,p[0]+r[1])=max(1,1+1)=2=<em>m<strong>a</strong>x</em>(1,<em>p</em>[0]+<em>r</em>[1])=<em>m<strong>a</strong>x</em>(1,1+1)=2<br>=max(2,p[1]+r[0])=max(2,5+0)=5=<em>m<strong>a</strong>x</em>(2,<em>p</em>[1]+<em>r</em>[0])=<em>m<strong>a</strong>x</em>(2,5+0)=5<br>r[3]:<em>r</em>[3]:<br>=max(5,p[0]+r[2])=max(5,1+5)=6=<em>m<strong>a</strong>x</em>(5,<em>p</em>[0]+<em>r</em>[2])=<em>m<strong>a</strong>x</em>(5,1+5)=6<br>=max(2,p[1]+r[1])=max(6,5+1)=6=<em>m<strong>a</strong>x</em>(2,<em>p</em>[1]+<em>r</em>[1])=<em>m<strong>a</strong>x</em>(6,5+1)=6<br>=max(2,p[2]+r[0])=max(6,8+0)=8=<em>m<strong>a</strong>x</em>(2,<em>p</em>[2]+<em>r</em>[0])=<em>m<strong>a</strong>x</em>(6,8+0)=8<br>r[4]:<em>r</em>[4]:<br>=max(8,p[0]+r[3])=max(8,1+8)=9=<em>m<strong>a</strong>x</em>(8,<em>p</em>[0]+<em>r</em>[3])=<em>m<strong>a</strong>x</em>(8,1+8)=9<br>=max(9,p[1]+r[2])=max(9,5+5)=10=<em>m<strong>a</strong>x</em>(9,<em>p</em>[1]+<em>r</em>[2])=<em>m<strong>a</strong>x</em>(9,5+5)=10<br>=max(10,p[2]+r[1])=max(10,8+1)=10=<em>m<strong>a</strong>x</em>(10,<em>p</em>[2]+<em>r</em>[1])=<em>m<strong>a</strong>x</em>(10,8+1)=10<br>=max(10,p[3]+r[0])=max(10,9+0)=10=<em>m<strong>a</strong>x</em>(10,<em>p</em>[3]+<em>r</em>[0])=<em>m<strong>a</strong>x</em>(10,9+0)=10</p>
-<hr>
-<h3 id="子问题图"><a href="#子问题图" class="headerlink" title="子问题图"></a>子问题图</h3><p>思考一个动态规划问题时，我们应该弄清所涉及的子问题及子问题之间的依赖关系。<br>n=4<em>n</em>=4 时的钢条切割问题的子问题图:<br><img src="https://tva1.sinaimg.cn/large/006y8mN6ly1g89ks36cokj30820eg0uk.jpg" alt="img"><br>有向边(x,y)(<em>x</em>,<em>y</em>)表示当求解子问题x<em>x</em>时需要子问题y<em>y</em>的解。<br>树中标号相同的结点收缩为图中的但一顶点，所有边均从父结点指向子结点。<br>自顶向下的处理方法：<br>在求解x<em>x</em>时需要直接递归调用自身来求解y<em>y</em>（子问题就是从x<em>x</em>到y<em>y</em>的一条边）–深度优先<br>自底向上的处理方法：<br>给定一个子问题x<em>x</em>，求解它之前先求解邻接它的子问题y<em>y</em> – 对于任何子问题，直至它依赖的所有子问题均已3求解完成，才会求解它。</p>
-<hr>
-<h3 id="重解构"><a href="#重解构" class="headerlink" title="重解构"></a>重解构</h3><p>扩展动态规划算法，使之对每个子问题不仅保存最优收益值，还保存对应的方案。<br>钢条切割自底向上切割方法拓展：<br>伪代码</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">extended-bottom-up-cut-rod(p, n)</span><br><span class="line">1    let r[0…n] and s[0…n] be new arrays</span><br><span class="line">2    r[0] &#x3D; 0</span><br><span class="line">3    for j&#x3D;1 to n</span><br><span class="line">4        q &#x3D; -∞</span><br><span class="line">5        for i&#x3D;1 to j</span><br><span class="line">6            if q &lt; p[i]+r[j-i]</span><br><span class="line">7                q &#x3D; p[i]+r[j-i]</span><br><span class="line">8                s[j] &#x3D; i</span><br><span class="line">9        r[j] &#x3D; q</span><br><span class="line">10    return r and s </span><br><span class="line"></span><br><span class="line">print-cut-rob-solution(p, n)</span><br><span class="line">1    (r, s) &#x3D; extended-bottom-up-cut-rod(p, n)</span><br><span class="line">2    while n&gt;0</span><br><span class="line">3        print s[n]</span><br><span class="line">4        n &#x3D; n-s[n]</span><br></pre></td></tr></table></figure>
-
-<p>Java代码</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">extendedCutRodBottomUp</span><span class="params">(<span class="keyword">int</span> length)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span>[] r = <span class="keyword">new</span> <span class="keyword">int</span>[length + <span class="number">1</span>];</span><br><span class="line">    <span class="keyword">int</span>[] s = <span class="keyword">new</span> <span class="keyword">int</span>[length + <span class="number">1</span>];</span><br><span class="line">    r[<span class="number">0</span>] = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">int</span> res = Integer.MIN_VALUE;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;= length; i++) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">1</span>; j &lt;= i; j++) &#123;</span><br><span class="line">            res = Math.max(res, prices[j - <span class="number">1</span>] + r[i - j]);</span><br><span class="line">            s[i] = (prices[j - <span class="number">1</span>] + r[i - j]) == res ? (j - <span class="number">1</span>) : s[i];</span><br><span class="line">        &#125;</span><br><span class="line">        r[i] = res;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> s[length];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> List&lt;Integer&gt; <span class="title">result</span><span class="params">(<span class="keyword">int</span> length)</span> </span>&#123;</span><br><span class="line">    List&lt;Integer&gt; res = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    <span class="keyword">while</span> (length &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">int</span> firstCut = extendedCutRodBottomUp(length) + <span class="number">1</span>;</span><br><span class="line">        res.add(firstCut);</span><br><span class="line">        length -= firstCut;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="en">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/29/%E5%9B%BE%E8%A7%A3%20TCP:IP%20%E6%91%98%E8%A6%81/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1724,6 +1525,151 @@
 <li>Boolean</li>
 <li>Query Expansion</li>
 </ol>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/02/11/InnoDB%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/02/11/InnoDB%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/" class="post-title-link" itemprop="url">InnoDB存储引擎</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-02-11 22:22:27" itemprop="dateCreated datePublished" datetime="2020-02-11T22:22:27+08:00">2020-02-11</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="InnoDB存储引擎"><a href="#InnoDB存储引擎" class="headerlink" title="InnoDB存储引擎"></a>InnoDB存储引擎</h1><h2 id="InnoDB体系架构"><a href="#InnoDB体系架构" class="headerlink" title="InnoDB体系架构"></a>InnoDB体系架构</h2><h3 id="后台线程"><a href="#后台线程" class="headerlink" title="后台线程"></a>后台线程</h3><p><strong>线程类型：</strong></p>
+<ol>
+<li>Master Thread：负责将缓冲池中的数据异步刷新到磁盘，保证数据一致性（脏页刷新、合并插入缓冲、undo页回收）。</li>
+<li>IO Thread：InnoDB 用了大量 AIO（Async IO）处理写 IO 请求，IO Thread 负责这些 IO 请求的回调处理。</li>
+<li>Purge Thread：回收已经使用并分配的 undo 页。</li>
+<li>Page Cleaner Thread：减轻原 Master Thread 的工作，提高 InnoDB 存储性能。</li>
+</ol>
+<h3 id="内存"><a href="#内存" class="headerlink" title="内存"></a>内存</h3><h4 id="缓冲池"><a href="#缓冲池" class="headerlink" title="缓冲池"></a>缓冲池</h4><ul>
+<li>缓冲区是一块内存区域，通过内存的速度来弥补磁盘速度较慢对数据库性能影响。</li>
+<li>数据库首次读取页时，会把从磁盘里读取的页放在缓冲池中，下次该页被缓冲池命中，则读取页，否则，在磁盘里中读取。</li>
+<li>对于数据库中的页的修改操作，先修改缓存池中的页，再以一定的频率刷到磁盘中。（Checkpoint 机制）</li>
+<li>InnoDB内存数据对象<br><img src="https://tva1.sinaimg.cn/large/0082zybpgy1gbsr8nebt7j31680iqag2.jpg" alt="img"></li>
+</ul>
+<p><strong>LRU list</strong></p>
+<ul>
+<li>通常来说，数据库的缓冲池是通过 LRU 算法进行管理的（频繁使用的页在列表最前端，最少使用的页在尾端）。</li>
+<li>优化的 LRU 算法：新读到的页放到 LRU 列表的 midpoint 位置。（原因：当进行某些操作如索引或数据的扫描，可能会使缓冲池中的页被刷新出，影响缓冲池效率。这些操作访问的很多页都是仅在这次操作中需要，并不是活跃数据。）</li>
+</ul>
+<p><strong>LRU list vs Free list</strong><br>数据库刚启动时，LRU 列表是空的，所有页都存在 Free 列表中。当需要从缓冲池中分页时，首先从 Free 列表中查找是否有空闲页，若有则将该页从 Free 列表中删除，放入到 LRU 列表中。</p>
+<p><strong>脏页和Flush list</strong><br>在 LRU 列表中的页被修改后，称该页为脏页，即缓冲池中的页和磁盘上的页的数据产生了不一致。数据库会通过 CHECKPOINT 机制将脏页刷新回磁盘，Flush 列表中的页就是脏页列表。</p>
+<h4 id="重做日志缓冲、额外的内存池"><a href="#重做日志缓冲、额外的内存池" class="headerlink" title="重做日志缓冲、额外的内存池"></a>重做日志缓冲、额外的内存池</h4><p><strong>重做日志缓冲：</strong></p>
+<ul>
+<li>InnoDB 存储引擎首先将重做日志信息放到这个缓冲区，然后按照一定的频率刷新到重做日志文件。</li>
+<li>一般情况下 重做日志缓冲池只需要 8M 就够了，因为重做日志会在下面三种情况把内存刷到外部磁盘的重做日志文件中：<ul>
+<li>Master Thread 每一秒就会进行刷新操作</li>
+<li>每个事务提交就会进行刷新操作</li>
+<li>重做日志缓冲池空间剩余1/2时会进行刷新操作。</li>
+</ul>
+</li>
+</ul>
+<p><strong>额外的内存池：</strong><br>对一些数据结构本身的内存进行分配时，需要从额外的内存池中进行申请，当该区域不够时，会向缓冲池中进行申请。</p>
+<h3 id="Checkpoint-技术"><a href="#Checkpoint-技术" class="headerlink" title="Checkpoint 技术"></a>Checkpoint 技术</h3><p>Checkpoint 技术的目的是为了解决：</p>
+<ol>
+<li>缩短数据库的恢复时间<br>当数据库发生宕机时，数据库不需要重做所有的日志，因为 Checkpoint 之前的页都已经刷新回磁盘。</li>
+<li>缓冲池不够用时，将脏页刷新到磁盘<br>当缓冲池不够用时，LRU 算法回溢出最近最少使用的页，如果这个页是脏页，就前置执行 Checkpoint，将脏页刷进磁盘。</li>
+<li>重做日志不可用时，刷新脏页</li>
+</ol>
+<p>Innodb 有2种 Checkpoint</p>
+<ol>
+<li>Sharp Checkpoint：发生在数据库关闭时将所有的脏页都刷新回磁盘。</li>
+<li>Fuzzy Checkpoint：进行页刷新时，只刷新一部分脏页。<br>Master Thread Checkpoint、FLUSH_LRU_LIST Checkpoint、Async/Sync Flush Checkpoint、Dirty Page too much Checkpoint 都属于Fuzzy Checkpoint</li>
+</ol>
+<h3 id="InnoDB关键特性"><a href="#InnoDB关键特性" class="headerlink" title="InnoDB关键特性"></a>InnoDB关键特性</h3><h4 id="插入缓冲"><a href="#插入缓冲" class="headerlink" title="插入缓冲"></a>插入缓冲</h4><p><strong>Insert Buffer</strong></p>
+<ul>
+<li>Insert Buffer 和数据页一样，都是物理页的一个组成部分，并不是缓冲池中的一部分。</li>
+<li>插入聚集索引（Primary Key）是顺序的不需要磁盘随机读；对于非聚集辅助索引（secondary index）叶子节点的插入不是顺序的，需要离散的访问非聚集索引页，导致插入操作新能下降。（有些辅助索引插入仍是顺序的，比如ctime）</li>
+<li>对于非聚集索引的插入或更新操作，不是每一次都直接插入到索引页中，而是先判断插入的非聚集索引页是否在缓冲池中，若在直接插入，若不在先放到 Insert Buffer 对象中。然后以一定的频率和情况进行 Insert Buffer 和辅助索引叶子节点的 merge 操作。</li>
+<li>使用 Insert Buffer 需要满足一下子2个条件<ol>
+<li>索引是辅助索引</li>
+<li>索引不是唯一索引</li>
+</ol>
+</li>
+<li>例子：2246304 次 merge 可以 merge 7540969数据，比例差不多是1:3，代表了插入缓冲将对于非聚聚索引页的离散 IO 逻辑请求大约降低了 2/3</li>
+<li>Insert Buffer 的数据结构是一棵 B+ 树（非叶子节点存放的是查询的键值）</li>
+</ul>
+<p><strong>Change Buffer</strong></p>
+<ul>
+<li>Change Buffer 是 Insert Buffer 的升级，引入了 Delete Buffer 和 Purge Buffer。（对象依旧是非唯一的辅助索引）</li>
+<li>Delete 操作可能分为2个过程：<ol>
+<li>将记录标记为已删除（Delete Buffer 操作）</li>
+<li>真正将记录删除（Purge Buffer 操作）</li>
+</ol>
+</li>
+<li>SHOW ENGINE INNODB STATUS 展示：<br><img src="https://tva1.sinaimg.cn/large/0082zybpgy1gbtiwa09bej313y0j2n2t.jpg" alt="img"><br>insert 表示 Insert Buffer；delete mark 表示 Delete Buffer；delete 表示 Purge Buffer</li>
+</ul>
+<h3 id="两次写"><a href="#两次写" class="headerlink" title="两次写"></a>两次写</h3><p>为了解决partial page write问题，InnoDB实现了double write buffer，简单来说，就是在写数据页之前，先把这个数据页写到一块独立的物理文件位置（ibdata），然后再写到数据页。这样在宕机重启时，如果出现数据页损坏，那么在应用redo log之前，需要通过该页的副本来还原该页，然后再进行redo log重做，这就是double write。<br>工作流程：<br><img src="https://tva1.sinaimg.cn/large/0082zybpgy1gbtu60dga3j30j60dm767.jpg" alt="img"></p>
+<h3 id="自适应哈希索引"><a href="#自适应哈希索引" class="headerlink" title="自适应哈希索引"></a>自适应哈希索引</h3><ul>
+<li>InnoDB存储引擎会监控对表上各索引页的查询。如果观察到建立哈希索引可以带来速度提升,则建立哈希索引,称之为自适应哈希索引(Adaptive Hash Index,AHI) 。</li>
+<li>经常访问的二级索引数据（热点数据）会自动被生成到hash索引里面去(最近连续被访问三次的数据)，自适应哈希索引通过缓冲池的B+树构造而来，因此建立的速度很快。</li>
+<li>AHI 要求：<ul>
+<li>以该模式访问了100次</li>
+<li>页通过该模式访问了N次（N=页中记录 * 1/16）</li>
+</ul>
+</li>
+<li>AHI 缺点：<ol>
+<li>hash自适应索引会占用innodb buffer pool；</li>
+<li>自适应hash索引只适合搜索等值的查询（例如=、&lt;=&gt;、in），如select * from table where index_col=’xxx’，而对于其他查找类型，如范围查找，是不能使用的；</li>
+<li>极端情况下，自适应hash索引才有比较大的意义，可以降低逻辑读。</li>
+<li>无法用于排序</li>
+<li>有冲突可能</li>
+<li>MySQL自动管理，人为无法干预。</li>
+</ol>
+</li>
+</ul>
+<h3 id="异步-IO"><a href="#异步-IO" class="headerlink" title="异步 IO"></a>异步 IO</h3><p>采用异步 IO（Asynchronous IO，AIO）的方式来处理磁盘可以提高磁盘操作性能。</p>
+<p><strong>Sync IO vs AIO</strong><br>Sync IO 每进行一次 IO 操作，需要等待此次操作结束才能继续接下来的操作；AIO 可以在发出一个 IO 请求后立即在发出另一个 IO 请求，当全部 IO 请求发送完毕后，等待所有 IO 操作的完成。</p>
+<p><strong>IO merge</strong><br>将多个 IO 合并为一个 IO，以提高 IOPS 性能。<br>例子：用户需要访问页的（space, page_no）为：(8，6)、(8，7)、(8，8)。每页大小为16K，如果使用同步 IO 需要进行3次 IO 操作；而AIO 会判断这三个页是连续的，因此 AIO 底层会发送一个 IO 请求，从（8，6）开始读 48K 的页</p>
+<p><strong>刷新邻接页</strong><br>当刷新一个脏页时，innodb存储引擎会检测该页所在区(extent)的所有页，如果是脏页，那么一起进行刷新。这样做的好处显而易见，通过AIO可以将多个IO写入操作合并为一个IO操作，增大写入量，减少了物理写IO，故该工作机制在传统机械磁盘下有着显著的优势。</p>
 
       
     </div>
