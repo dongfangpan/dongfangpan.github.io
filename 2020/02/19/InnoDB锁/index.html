@@ -48,7 +48,7 @@
 
   <meta name="description" content="锁InnoDB存储引擎提供一致性的非锁定读、行级锁支持。行级锁没有相关额外的开销，并可以同时得到并发性和一致性。且InnoDB不需要锁升级，因为一个锁和多个锁开销是一样的。 InnoDB锁锁的类型InnoDB实现了两种标准行级锁：  共享锁（S Lock），允许事务读一行数据。 排他锁（X Lock），允许事务修改或删除一行数据。      X S    X 不兼容 不兼容   S 不兼容 兼容">
 <meta property="og:type" content="article">
-<meta property="og:title" content="InnoDB备份与恢复">
+<meta property="og:title" content="InnoDB锁">
 <meta property="og:url" content="http://yoursite.com/2020/02/19/InnoDB%E9%94%81/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="锁InnoDB存储引擎提供一致性的非锁定读、行级锁支持。行级锁没有相关额外的开销，并可以同时得到并发性和一致性。且InnoDB不需要锁升级，因为一个锁和多个锁开销是一样的。 InnoDB锁锁的类型InnoDB实现了两种标准行级锁：  共享锁（S Lock），允许事务读一行数据。 排他锁（X Lock），允许事务修改或删除一行数据。      X S    X 不兼容 不兼容   S 不兼容 兼容">
@@ -72,7 +72,7 @@
   };
 </script>
 
-  <title>InnoDB备份与恢复 | Hexo</title>
+  <title>InnoDB锁 | Hexo</title>
   
 
 
@@ -184,7 +184,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          InnoDB备份与恢复
+          InnoDB锁
         </h1>
 
         <div class="post-meta">
@@ -395,12 +395,12 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2020/02/14/InnoDB%E7%B4%A2%E5%BC%95%E4%B8%8E%E7%AE%97%E6%B3%95/" rel="prev" title="InnoDB备份与恢复">
-      <i class="fa fa-chevron-left"></i> InnoDB备份与恢复
+    <a href="/2020/02/14/InnoDB%E7%B4%A2%E5%BC%95%E4%B8%8E%E7%AE%97%E6%B3%95/" rel="prev" title="InnoDB索引与算法">
+      <i class="fa fa-chevron-left"></i> InnoDB索引与算法
     </a></div>
       <div class="post-nav-item">
-    <a href="/2020/02/20/InnoDB%E4%BA%8B%E5%8A%A1/" rel="next" title="InnoDB备份与恢复">
-      InnoDB备份与恢复 <i class="fa fa-chevron-right"></i>
+    <a href="/2020/02/20/InnoDB%E4%BA%8B%E5%8A%A1/" rel="next" title="InnoDB事务">
+      InnoDB事务 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
