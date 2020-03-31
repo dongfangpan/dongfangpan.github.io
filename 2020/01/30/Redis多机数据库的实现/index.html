@@ -49,7 +49,7 @@
   <meta name="description" content="多机数据库的实现复制用户通过执行 SLAVEOF 命令或设置 slaveof 选项进行复制。被复制服务器为主服务器，对主服务器进行复制的服务器为从服务器。 旧版主从复制过程  从服务器发送 SYNC 命令 主服务器接收到 SYNC 命令，执行 BGSAVE 命令，后台生成 RDB 文件和缓冲区用于存贮在复制过程中执行的命令 BGSAVE 命令完成后，主服务器向从服务器发送 RDB 文件，从服务器载">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Redis多机数据库的实现">
-<meta property="og:url" content="http://yoursite.com/2020/03/29/Redis%E5%A4%9A%E6%9C%BA%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AE%9E%E7%8E%B0/index.html">
+<meta property="og:url" content="http://yoursite.com/2020/01/30/Redis%E5%A4%9A%E6%9C%BA%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AE%9E%E7%8E%B0/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="多机数据库的实现复制用户通过执行 SLAVEOF 命令或设置 slaveof 选项进行复制。被复制服务器为主服务器，对主服务器进行复制的服务器为从服务器。 旧版主从复制过程  从服务器发送 SYNC 命令 主服务器接收到 SYNC 命令，执行 BGSAVE 命令，后台生成 RDB 文件和缓冲区用于存贮在复制过程中执行的命令 BGSAVE 命令完成后，主服务器向从服务器发送 RDB 文件，从服务器载">
 <meta property="og:locale" content="en_US">
@@ -70,13 +70,13 @@
 <meta property="og:image" content="https://tva1.sinaimg.cn/large/006tNbRwgy1gbh071bedbj318m0fqdm8.jpg">
 <meta property="og:image" content="https://tva1.sinaimg.cn/large/006tNbRwgy1gbh0dr2qpaj30tu0xon1b.jpg">
 <meta property="og:image" content="https://tva1.sinaimg.cn/large/006tNbRwgy1gbh6rhjb7fj30u00wtk0a.jpg">
-<meta property="article:published_time" content="2020-03-29T12:38:20.504Z">
-<meta property="article:modified_time" content="2020-03-29T12:38:22.436Z">
+<meta property="article:published_time" content="2020-01-30T14:22:27.000Z">
+<meta property="article:modified_time" content="2020-01-30T14:22:27.000Z">
 <meta property="article:author" content="John Doe">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://tva1.sinaimg.cn/large/006tNbRwgy1gbelypepsdj30gk07o0u0.jpg">
 
-<link rel="canonical" href="http://yoursite.com/2020/03/29/Redis%E5%A4%9A%E6%9C%BA%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AE%9E%E7%8E%B0/">
+<link rel="canonical" href="http://yoursite.com/2020/01/30/Redis%E5%A4%9A%E6%9C%BA%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AE%9E%E7%8E%B0/">
 
 
 <script id="page-configurations">
@@ -187,7 +187,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/29/Redis%E5%A4%9A%E6%9C%BA%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AE%9E%E7%8E%B0/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/01/30/Redis%E5%A4%9A%E6%9C%BA%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AE%9E%E7%8E%B0/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -209,9 +209,8 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
-              
 
-              <time title="Created: 2020-03-29 20:38:20 / Modified: 20:38:22" itemprop="dateCreated datePublished" datetime="2020-03-29T20:38:20+08:00">2020-03-29</time>
+              <time title="Created: 2020-01-30 22:22:27" itemprop="dateCreated datePublished" datetime="2020-01-30T22:22:27+08:00">2020-01-30</time>
             </span>
 
           
@@ -309,11 +308,11 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2020/03/29/Redis%E5%8D%95%E6%9C%BA%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AE%9E%E7%8E%B0/" rel="prev" title="Redis单机数据库的实现">
+    <a href="/2020/01/26/Redis%E5%8D%95%E6%9C%BA%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AE%9E%E7%8E%B0/" rel="prev" title="Redis单机数据库的实现">
       <i class="fa fa-chevron-left"></i> Redis单机数据库的实现
     </a></div>
       <div class="post-nav-item">
-    <a href="/2020/03/29/Redis%E7%8B%AC%E7%AB%8B%E5%8A%9F%E8%83%BD%E5%AE%9E%E7%8E%B0/" rel="next" title="Redis独立功能实现">
+    <a href="/2020/02/02/Redis%E7%8B%AC%E7%AB%8B%E5%8A%9F%E8%83%BD%E5%AE%9E%E7%8E%B0/" rel="next" title="Redis独立功能实现">
       Redis独立功能实现 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>

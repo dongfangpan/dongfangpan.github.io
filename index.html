@@ -165,7 +165,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AF%BC%E8%AE%BA-%E6%8C%81%E4%B9%85%E5%8C%96/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/25/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AF%BC%E8%AE%BA-%E6%8C%81%E4%B9%85%E5%8C%96/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -179,7 +179,7 @@
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
           
-            <a href="/2020/03/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AF%BC%E8%AE%BA-%E6%8C%81%E4%B9%85%E5%8C%96/" class="post-title-link" itemprop="url">操作系统导论-持久化</a>
+            <a href="/2020/03/25/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AF%BC%E8%AE%BA-%E6%8C%81%E4%B9%85%E5%8C%96/" class="post-title-link" itemprop="url">操作系统导论-持久化</a>
         </h1>
 
         <div class="post-meta">
@@ -188,9 +188,8 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
-              
 
-              <time title="Created: 2020-03-31 17:50:56 / Modified: 17:53:35" itemprop="dateCreated datePublished" datetime="2020-03-31T17:50:56+08:00">2020-03-31</time>
+              <time title="Created: 2020-03-25 22:22:27" itemprop="dateCreated datePublished" datetime="2020-03-25T22:22:27+08:00">2020-03-25</time>
             </span>
 
           
@@ -204,7 +203,31 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h4 id="磁盘驱动器"><a href="#磁盘驱动器" class="headerlink" title="磁盘驱动器"></a>磁盘驱动器</h4><ul>
+          <h1 id="操作系统导论-持久化"><a href="#操作系统导论-持久化" class="headerlink" title="操作系统导论-持久化"></a>操作系统导论-持久化</h1><h2 id="持久化"><a href="#持久化" class="headerlink" title="持久化"></a>持久化</h2><h3 id="I-O"><a href="#I-O" class="headerlink" title="I/O"></a>I/O</h3><h4 id="I-O设备"><a href="#I-O设备" class="headerlink" title="I/O设备"></a>I/O设备</h4><ul>
+<li>寄存器：<ul>
+<li>状态寄存器：可以读取并查看设备的当前状态</li>
+<li>命令寄存器：用于通知设备执行某个具体任务</li>
+<li>数据寄存器：将数据传给谁备货从设备接收数据</li>
+</ul>
+</li>
+<li>协议的执行过程：<ol>
+<li>轮询设备：操作系统反复读取状态处理器，等待设备进入可以接受命令的状态。</li>
+<li>操作系统下发数据到数据寄存器，如果主CPU参与磁盘的写入操作，这个操作就是I/O</li>
+<li>操作系统将命令写入命令寄存器，设备执行命令。</li>
+<li>操作系统不断轮询设备，等待并判断设备是否执行完成命令（成功或失败）。</li>
+</ol>
+</li>
+<li>减少CPU开销<ul>
+<li>中断：有了中断之后，CPU不再需要轮询设备，只需要向设备发出一个请求，然后就可以让对应进程睡眠，切换执行其他任务。当完成了操作，跑出了硬件中断，引发CPU跳转执行中断处理程序。</li>
+<li>例子：<br><img src="https://tva1.sinaimg.cn/large/00831rSTgy1gd6fxyh3t0j30xc0aqt9j.jpg" alt="img"></li>
+<li>如果设备非常快，通常使用轮询，轮询次数少，可以省去中断的操作；如果设备很慢，则用中断；如果设备的速度未知或忽快忽慢，则可以以使用混合策略，先轮询几次，在进行中断。</li>
+<li>可以利用DMA（direct memory access）来节省数据从内存拷贝到磁盘的过程</li>
+<li>例子：<br><img src="https://tva1.sinaimg.cn/large/00831rSTgy1gd6g2fgmdlj30t80c6t9e.jpg" alt="img"></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h4 id="磁盘驱动器"><a href="#磁盘驱动器" class="headerlink" title="磁盘驱动器"></a>磁盘驱动器</h4><ul>
 <li>磁盘的结构<br><img src="https://tva1.sinaimg.cn/large/00831rSTgy1gd6grglrjhj30ft0efgoq.jpg" alt="img"></li>
 <li>寻道<br><img src="https://tva1.sinaimg.cn/large/00831rSTgy1gd6gu5fvydj30v80g2n1p.jpg" alt="img"></li>
 <li>I/O时间图：首先寻道，然后等待转动延迟，最后传输。</li>
@@ -337,7 +360,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/29/%E5%9B%BE%E8%A7%A3%20TCP:IP%20%E6%91%98%E8%A6%81/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/14/%E5%9B%BE%E8%A7%A3%20TCP:IP%20%E6%91%98%E8%A6%81/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -351,7 +374,7 @@
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
           
-            <a href="/2020/03/29/%E5%9B%BE%E8%A7%A3%20TCP:IP%20%E6%91%98%E8%A6%81/" class="post-title-link" itemprop="url">图解 TCP:IP 摘要</a>
+            <a href="/2020/03/14/%E5%9B%BE%E8%A7%A3%20TCP:IP%20%E6%91%98%E8%A6%81/" class="post-title-link" itemprop="url">图解 TCP/IP 摘要</a>
         </h1>
 
         <div class="post-meta">
@@ -360,9 +383,8 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
-              
 
-              <time title="Created: 2020-03-29 20:43:33 / Modified: 20:56:41" itemprop="dateCreated datePublished" datetime="2020-03-29T20:43:33+08:00">2020-03-29</time>
+              <time title="Created: 2020-03-14 22:22:27" itemprop="dateCreated datePublished" datetime="2020-03-14T22:22:27+08:00">2020-03-14</time>
             </span>
 
           
@@ -436,382 +458,6 @@
 <li>流量控制：流量控制是作用于接收者的，它是控制发送者的发送速度从而使接收者来得及接收，防止分组丢失的。</li>
 </ul>
 </li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/29/Redis%E7%8B%AC%E7%AB%8B%E5%8A%9F%E8%83%BD%E5%AE%9E%E7%8E%B0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/29/Redis%E7%8B%AC%E7%AB%8B%E5%8A%9F%E8%83%BD%E5%AE%9E%E7%8E%B0/" class="post-title-link" itemprop="url">Redis独立功能实现</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-              
-
-              <time title="Created: 2020-03-29 20:39:24 / Modified: 20:39:29" itemprop="dateCreated datePublished" datetime="2020-03-29T20:39:24+08:00">2020-03-29</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="独立功能实现"><a href="#独立功能实现" class="headerlink" title="独立功能实现"></a>独立功能实现</h1><h2 id="发布与订阅"><a href="#发布与订阅" class="headerlink" title="发布与订阅"></a>发布与订阅</h2><p>Redis 的发布与订阅功能有 <code>PUBLISH、SUBSCRIBE、PSUBSCRIBE</code> 等命令组成。<br>通过执行 <code>SUBSCRIBE</code> 命令，客户端可以订阅一个或多个频道，从而成为这些频道的订阅者（subscriber）：<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbi9aesmvzj312w090jug.jpg" alt="img"><br>客户端可以通过执行 <code>PSUBSCRIBE</code> 命令订阅一个或多个模式，从而成为这些模式的订阅者：<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbi97qzy7oj31bg0be0xw.jpg" alt="img"></p>
-<p><strong>频道和模式的订阅与退订</strong><br><img src="https://tva1.sinaimg.cn/large/0082zybply1gbnx37m3j8j31ew0a8gpj.jpg" alt="img"></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">redisServer</span> &#123;</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// 保存所有频道的订阅关系：键是被订阅的频道，值是所有订阅者的链表</span></span><br><span class="line">    <span class="comment">// 若订阅时频道有其他订阅者，则在链表尾部添加该订阅者；若订阅时频道没有其他订阅者，则创建键，再把客户端添加到链表头</span></span><br><span class="line">    <span class="comment">// 退订时也会检查退订者是否为该频道唯一订阅者，若不是则在链表中删除该订阅者，若是连带键（频道）一起删除</span></span><br><span class="line">    dict *pubsub_channels;</span><br><span class="line">    </span><br><span class="line">   <span class="comment">// 保存所有模式订阅关系：链表的每个节点保存着一个pubsubPattern结构，记录了客户端（client）和模式（pattern）</span></span><br><span class="line">   <span class="comment">// 客户端订阅模式时，新建一个与该客户端对应的pubsubPattern结构，添加在链表尾部</span></span><br><span class="line">   <span class="comment">// 客户端退订模式时，会在链表中删除与该客户端对应的模式的pubsubPattern结构</span></span><br><span class="line">   <span class="built_in">list</span> *pubsub_petterns;</span><br><span class="line">   ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><strong>查看订阅消息</strong><br><code>PUBSUB CHANNELS [pattern]</code>用于返回服务器当前被订阅的频道。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">redis&gt; PUBSUB CHANNELS</span><br><span class="line">1) &quot;news.it&quot;</span><br><span class="line">2) &quot;news.sport&quot;</span><br><span class="line">3) &quot;news.bussiness&quot;</span><br><span class="line">4) &quot;news.movie&quot;</span><br><span class="line"></span><br><span class="line">redis&gt; PUBSUB CHANNELS &quot;news.[is]*&quot;</span><br><span class="line">1) &quot;news.it&quot;</span><br><span class="line">2) &quot;news.sport&quot;</span><br></pre></td></tr></table></figure>
-
-<p><code>PUBSUB NUMSUB [channel-1 ... channel-n]</code>用于返回频道的订阅者数量</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">redis&gt; PUBSUB NUMSUB news.it news.sport</span><br><span class="line">1) &quot;news.it&quot;</span><br><span class="line">2) 3</span><br><span class="line">3) &quot;news.sport&quot;</span><br><span class="line">4) 2</span><br></pre></td></tr></table></figure>
-
-<p><code>PUBSUB NUMPAT</code>用于返回服务器当前被订阅模式的数量</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">redis&gt; PUBSUB NUMPAT</span><br><span class="line">(integer) 3</span><br></pre></td></tr></table></figure>
-
-<h2 id="事务"><a href="#事务" class="headerlink" title="事务"></a>事务</h2><p><strong>事务的实现：</strong></p>
-<ol>
-<li>事务开始：<code>MULTI</code></li>
-<li>命令入队：除 <code>EXEC、DISCARD、WATCH、MULTI</code> 外的可执行命令</li>
-<li>事务执行：<code>EXEC</code></li>
-</ol>
-<p><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbibh8ke99j30og0iydjk.jpg" alt="img"></p>
-<p><strong>事务队列（FIFO）</strong></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; MULTI</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; SET &quot;name&quot; &quot;Practical Common Lisp&quot;</span><br><span class="line">QUEUED</span><br><span class="line">127.0.0.1:6379&gt; GET &quot;name&quot;</span><br><span class="line">QUEUED</span><br><span class="line">127.0.0.1:6379&gt; SET &quot;author&quot; &quot;Peter Serbel&quot;</span><br><span class="line">QUEUED</span><br><span class="line">127.0.0.1:6379&gt; GET &quot;author&quot;</span><br><span class="line">QUEUED</span><br><span class="line">127.0.0.1:6379&gt; EXEC</span><br><span class="line">1) OK</span><br><span class="line">2) &quot;Practical Common Lisp&quot;</span><br><span class="line">3) OK</span><br><span class="line">4) &quot;Peter Serbel&quot;</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbibkx6gt0j31160m0te8.jpg" alt="img"></p>
-<p><strong>WATCH 命令的实现</strong></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 当前客户端为c100，对c100执行WATCH命令</span><br><span class="line">c100&gt; WATCH &quot;name&quot;</span><br><span class="line">OK</span><br><span class="line">&#x2F;&#x2F; 客户端c100继续向服务器发送MULTI命令</span><br><span class="line">c100&gt; MULTI</span><br><span class="line">OK</span><br><span class="line">&#x2F;&#x2F; c100将一个SET命令放入事务队列</span><br><span class="line">c100&gt; SET &quot;name&quot; &quot;peter&quot;</span><br><span class="line">QUEUE</span><br><span class="line">&#x2F;&#x2F; 另一个客户端c101向服务器发送一条SET命令</span><br><span class="line">c101&gt; SET &quot;name&quot; &quot;john&quot;</span><br><span class="line">OK</span><br><span class="line">&#x2F;&#x2F; c101发的这条命令会使正在监视的name键的所有客户端的REDIS_DIRTY_CAS标识被打开，包括c100</span><br><span class="line">&#x2F;&#x2F; 当c100向服务器发送EXEC命令时，因为c100的REDIS_DIRTY_CAS标识被打开，所以拒绝执行它提交的事务</span><br><span class="line">c100&gt; EXEC</span><br><span class="line">(nil)</span><br></pre></td></tr></table></figure>
-
-<p><strong>事物的ACID性质</strong></p>
-<ol>
-<li>原子性：<br>数据库将事务中的多个操作当作一个整体来执行，要么都执行，要么都不执行。Redis 不支持事物会滚，即使事务中某个命令出现了错误，整个事务也会继续执行，直到都执行完毕为止，执行完了错误也会一并打印出来。</li>
-<li>一致性：<br>数据库在执行之前是一致的（数据符合数据库本身的定义和要求，没有包含非法或无效的错误数据），那执行事务之后无论成功与否数据库也是一致的。</li>
-<li>隔离性：<br>多个事务并发执行，也不会互相影响。</li>
-<li>持久性<br>当事务执行完了之后，所得到的结果会保存到永久性储存介质（如硬盘）中，即使执行事务完毕之后停机了，结果也不会丢失。<br>在 RDB 持久化模式下，需要执行 <code>BGSAVE</code> 才会对数据库进行保存，数据不能第一时间保存到硬盘里，所以 RDB 模式下的事务不具有持久性。<br>在 AOF 持久化模式下，如果 <code>appendfsync</code> 设置为 always，则事务具有持久性，设置为 everysec 或者 no 时不具有持久性</li>
-</ol>
-<h2 id="排序"><a href="#排序" class="headerlink" title="排序"></a>排序</h2><p>SORT 命令通过将被排序键包含的元素载入到数组里面，然后对数组进行排序完成对键进行排序的工作，该操作是有快速排序算法实现的。</p>
-<p><strong>排序过程</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbj8mrtxkxj31gq0hi0zb.jpg" alt="img"></p>
-<p><strong>选项的执行顺序</strong></p>
-<ol>
-<li>排序：命令使用 <code>ALPHA、ASC、DESC、BY</code> 这几个选项对键进行排序。</li>
-<li>限制排序结果集的长度：命令使用 <code>LIMIT</code> 选项对结果集进行限制。</li>
-<li>获取外部键：命令使用 <code>GET</code> 选项，根据排序结果集中的元素，以及 <code>GET</code> 选项制定模式，查找并获取指定键的值，并用这些值来做为新的排序结果集。</li>
-<li>保存结果集：命令使用 <code>STORE</code> 选项，把结果集保存到指定键上去。</li>
-</ol>
-<p><strong>例子</strong><br><code>SORT  ALPHA DESC BY  LIMIT   GET  STORE</code><br><strong>执行顺序</strong><br><code>SORT  ALPHA DESC BY</code> -&gt; <code>LIMIT</code> -&gt; <code>GET</code> -&gt; <code>STORE</code><br><em>除 <code>GET</code> 外，改变选项的摆放顺序，不会影响到SORT命令执行这些选项的顺序</em></p>
-<h2 id="慢查询日志"><a href="#慢查询日志" class="headerlink" title="慢查询日志"></a>慢查询日志</h2><p>服务器状态中包含了几个和慢查询日志功能相关的属性：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">rdisServer</span> &#123;</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// 下一条慢查询日志的ID</span></span><br><span class="line">    <span class="keyword">long</span> <span class="keyword">long</span> slowlog_entry_id;</span><br><span class="line">    <span class="comment">// 保存了所有慢查询日志的链表</span></span><br><span class="line">    <span class="comment">// 每一个节点都保存了一个slowlogEntry结构，每个slowlogEntry结构代表一条慢查询日志</span></span><br><span class="line">    <span class="built_in">list</span> *slowlog;</span><br><span class="line">    <span class="comment">// 指定执行时间超过多少微秒的命令会被记录在日志上</span></span><br><span class="line">    <span class="keyword">long</span> <span class="keyword">long</span> slowlog_log_slower_than;</span><br><span class="line">    <span class="comment">// 指定服务器最多保存多少条慢查询日志</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> slowlog_max_len;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><strong>慢查询相关rdisServer结构</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbjaechecmj30sy0acq51.jpg" alt="img"><br><strong>slowlogEntry结构</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbjaax04qyj30tg0awq55.jpg" alt="img"></p>
-<p><strong>slowlog特性</strong></p>
-<ol>
-<li>打印删除慢查询日志可以通过遍历 slowlog 链表来完成。</li>
-<li>slowlog 链表的长度就是服务器所保存慢查询日志的数量。</li>
-<li>新的慢查询日志会被添加到 slowlog 链表表头，如果日志数量超过<code>slowlog-max-len</code>选项的值，多出来的日志节点会从 slowlog 表尾删除。</li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/29/Redis%E5%A4%9A%E6%9C%BA%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AE%9E%E7%8E%B0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/29/Redis%E5%A4%9A%E6%9C%BA%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AE%9E%E7%8E%B0/" class="post-title-link" itemprop="url">Redis多机数据库的实现</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-              
-
-              <time title="Created: 2020-03-29 20:38:20 / Modified: 20:38:22" itemprop="dateCreated datePublished" datetime="2020-03-29T20:38:20+08:00">2020-03-29</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="多机数据库的实现"><a href="#多机数据库的实现" class="headerlink" title="多机数据库的实现"></a>多机数据库的实现</h1><h2 id="复制"><a href="#复制" class="headerlink" title="复制"></a>复制</h2><p>用户通过执行 SLAVEOF 命令或设置 slaveof 选项进行复制。<br>被复制服务器为主服务器，对主服务器进行复制的服务器为从服务器。</p>
-<p><strong>旧版主从复制过程</strong></p>
-<ol>
-<li>从服务器发送 SYNC 命令</li>
-<li>主服务器接收到 SYNC 命令，执行 BGSAVE 命令，后台生成 RDB 文件和缓冲区用于存贮在复制过程中执行的命令</li>
-<li>BGSAVE 命令完成后，主服务器向从服务器发送 RDB 文件，从服务器载入 RDB 文件并恢复数据库状态</li>
-<li>主服务器向从服务器发送缓存区保存的写命令，从服务器执行这些命令</li>
-<li>主服务器对从服务器执行命令传播操作<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbelypepsdj30gk07o0u0.jpg" alt="img"></li>
-</ol>
-<p><strong>为什么要改进旧版主从复制过程中的断线就完整同步的操作：</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbenbyiiqoj30zw0dsagg.jpg" alt="img"></p>
-<p><strong>新版主从复制改进</strong><br>使用 PSYNC 替代 SYNC，具有完整重同步和部分重同步两种模式。<br>完整重同步用于首次复制情况，和旧版的一样。<br>部分重同步摒弃了旧版复制功能在断线重连之后需要重新全部同步的缺陷，在断线重连之后只需要同步之前没同步的那些命令就行了。</p>
-<p><strong>部分重同步功能的构成：</strong></p>
-<ol>
-<li>主从服务器的复制偏移量 - 主从服务器偏移量不一致则进行重同步。</li>
-<li>主服务器的复制积压缓冲区 - 缓冲区是一个固定长度先进先出的队列，如果偏移量在缓冲区里面则进行部分重同步操作，否则进行完整重同步操作</li>
-<li>运行ID - 从服务器保存的运行ID和当前连接的主服务器运行ID相同则进行部分重同步操作，否则进行完整重同步操作。</li>
-</ol>
-<p><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbencrm06nj30pw0lajvp.jpg" alt="img"></p>
-<p><strong>心跳检测</strong><br>在命令传播阶段，从服务器默认每秒一次向主服务器发送命令<code>REPLCONF ACK</code>。该命令有3个作用：</p>
-<ol>
-<li>检测主服务器的网络连接状态，lag 值超过一秒证明主从服务器连接故障。</li>
-<li>辅助实现 min-slaves 配置选项</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">min-slaves-to-write 3</span><br><span class="line">min-slaves-max-lag 10</span><br></pre></td></tr></table></figure>
-
-<p>从服务器数量小于三个或从服务器延迟（lag）值&gt;=10秒，主服务器将拒绝执行写命令。<br>\3. 检测命令丢失 - 通过偏移量来判断命令是否丢失（和部分重同步类似，一个在没有断线时执行，一个在断线时执行）</p>
-<h2 id="Sentinel-哨兵"><a href="#Sentinel-哨兵" class="headerlink" title="Sentinel 哨兵"></a>Sentinel 哨兵</h2><p>Sentinel的故障转移功能<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbfq7bv68hj31210u0n9i.jpg" alt="img"></p>
-<h2 id="集群"><a href="#集群" class="headerlink" title="集群"></a>集群</h2><p>集群通过分片（sharding）来进行数据贡献，并提供复制和故障转移功能。</p>
-<h4 id="节点-node"><a href="#节点-node" class="headerlink" title="节点 node"></a>节点 node</h4><p>节点是运行在集群模式下的 Redis 服务器<br>一个 Redis 集群通常由多个节点（node）组成，一开始每个节点都是独立的，各个独立的节点连接起来构成一个多节点集群。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbfsfdi3bej31hq08ewic.jpg" alt="img"></p>
-<p><strong>节点启动</strong><br>节点会继续使用所有在单机模式下使用的服务器组建，如时间处理器，事件处理器，RDB AOF 持久化模块等。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbfshpcxamj30n008e0ug.jpg" alt="img"></p>
-<p><strong>节点的握手过程</strong></p>
-<ol>
-<li>节点 A 为节点 B 创建一个 clusterNode 结构，并将该结构添加到自己的 clusterState.nodes 字典里</li>
-<li>节点 A 发送 MEET 命令给节点 B</li>
-<li>节点 B 接收到 MEET 命令，为节点 A 创建一个 clusterNode 结构，将该结构添加到自己的 clusterState.nodes 字典里</li>
-<li>节点 B 向节点 A 发送 PONG 消息</li>
-<li>节点 A 接收到 PONG 消息，向节点 B 发送 PING 消息<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbfsmbky3zj30l20640ts.jpg" alt="img"></li>
-</ol>
-<h4 id="指派槽-slot"><a href="#指派槽-slot" class="headerlink" title="指派槽 slot"></a>指派槽 slot</h4><p>集群的整个数据库被分为 16384（214214）个槽，数据库中的每个键都属于着 16384 个槽的其中一个，集群中的每个节点可以处理 0～16384 个槽。<br>如果 16384 个槽都有节点在处理，集群处于上线状态（ok），否则，只要有一个槽没有节点处理，集群就处于下线状态（fail）。</p>
-<p><strong>记录节点的槽指派信息</strong><br><em>取出、设置slots数组的任意一个二进制位的值的复杂度为O(1)</em></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">clusterNode</span> &#123;</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// 长度为2048个字节的二进制数组</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">char</span> slots[<span class="number">16384</span>/<span class="number">8</span>]</span><br><span class="line">    <span class="comment">// 该节点负责处理的槽数量</span></span><br><span class="line">    <span class="keyword">int</span> numslots;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><strong>Redis 根据索引 i 上的二进制位的值来判断节点是否负责处理槽 i：</strong></p>
-<ul>
-<li>如果 slots 数组在索引 i 上的二进制位的值为1，那么表示节点负责处理槽 i。</li>
-<li>如果 slots 数组在索引 i 上的二进制位的值为0，那么表示节点不负责处理槽 i。</li>
-</ul>
-<p><strong>节点负责处理槽1、3、5、8、9、10的例子</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbftvw0ozxj30xm044jsg.jpg" alt="img"></p>
-<p><strong>传播节点槽指派信息</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbfty5ijrlj30dq08yjsk.jpg" alt="img"></p>
-<p><strong>记录集群所有槽的指派信息</strong></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">clusterState</span> &#123;</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// slots数组包含16834个项，每个数组项都是一个指向clusterNode结构的指针</span></span><br><span class="line">    clusterNode *slots[<span class="number">16384</span>]</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>通过将所有槽的指派信息保存在 clusterState.solts 数组里，程序要检查槽 i 是否被指派，又或者取得负责处理槽 i 的节点，只需要访问 clusterState.solts[i] 的值即可，复杂度为O(1)。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbfudd8ogrj30oo0q0adj.jpg" alt="img"></p>
-<h4 id="在集群中执行命令"><a href="#在集群中执行命令" class="headerlink" title="在集群中执行命令"></a>在集群中执行命令</h4><p>当客户端向节点发送与数据库有关的命令时，接收命令的节点会计算出要处理的数据属于哪个槽：<br>如果所在槽指派给了当前节点，节点直接执行命令；反之节点会向客户端返回一个 MOVED 错误 (在集群模式下不会打印 MOVED 错误)，指引客户端转向正确的节点，并再次发送之前要执行的命令。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbgwutggd9j30r00fkjup.jpg" alt="img"></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:7000&gt; set msg &quot;happy new year&quot;</span><br><span class="line">-&gt; Redirected to slot [6257] located at 127.0.0.1:7001</span><br><span class="line"></span><br><span class="line">127.0.0.1:7001&gt; get msg</span><br><span class="line">&quot;happy new year&quot;</span><br></pre></td></tr></table></figure>
-
-<p>节点将键值对保存在数据库里面，用 clusterState 结构中的 slots_to_keys 跳跃表保存槽和键的关系。（节点的分值是一个槽号，节点的成员是一个数据库键）</p>
-<h4 id="重新分片"><a href="#重新分片" class="headerlink" title="重新分片"></a>重新分片</h4><p>Redis 集群重新分片操作可以将任意数量的源节点的槽改为指派给目标节点，槽所属的键值对也会移动到目标节点上。重新分片操作可以在线进行，集群不需要下线。<br><strong>重新分片的过程</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbgygkem90j31a60ic7aa.jpg" alt="img"></p>
-<h4 id="ASK-错误"><a href="#ASK-错误" class="headerlink" title="ASK 错误"></a>ASK 错误</h4><p><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbgzdq4u7oj30o40ck77c.jpg" alt="img"><br><strong>ASK 错误和 MOVED 错误区别</strong><br>MOVED 错误表示槽的负责权已经从一个节点转移到了另一个节点，而 ASK 作物知识两个节点在迁移槽的过程中使用的一种临时措施。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbgzh3dyoqj30nq0e841q.jpg" alt="img"></p>
-<h4 id="复制与故障转移"><a href="#复制与故障转移" class="headerlink" title="复制与故障转移"></a>复制与故障转移</h4><p>Redis 集群中的节点分为主节点 master 和从节点 slave，其中主节点用于处理槽，从节点用于复制主节点，在主节点下线时代替下线节点处理槽。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbh071bedbj318m0fqdm8.jpg" alt="img"></p>
-<p><strong>主从节点的结构</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbh0dr2qpaj30tu0xon1b.jpg" alt="img"></p>
-<p><strong>故障检测</strong></p>
-<ol>
-<li>集群中每一个主节点都会定期向集群中的其他主节点发送 PING 消息，其他节点收到消息会返回一个 PONG 消息。</li>
-<li>当一个节点发送 PING 之后的一定时间内未收到 PONG 消息，则把接收节点 x 标记为疑似下线节点。</li>
-<li>当超过半数的主节点都把 x 节点标记为疑似下线节点，则 x 节点会被标记为下线。</li>
-<li>x 节点的其中一个从节点会竞选成为新的主节点（每个主节点都有投票权，当超过半数的主节点吧支持票投给其中一个从节点，那这个从节点就被选举为新的主节点）</li>
-</ol>
-<h4 id="消息"><a href="#消息" class="headerlink" title="消息"></a>消息</h4><p>集群中的节点通过发送和接收消息来进行通信，常见的消息包括 MEET、PING、PONG、PUBLISH、FAIL 五种。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbh6rhjb7fj30u00wtk0a.jpg" alt="img"></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/29/Redis%E5%8D%95%E6%9C%BA%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AE%9E%E7%8E%B0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/29/Redis%E5%8D%95%E6%9C%BA%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AE%9E%E7%8E%B0/" class="post-title-link" itemprop="url">Redis单机数据库的实现</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-              
-
-              <time title="Created: 2020-03-29 20:35:08 / Modified: 20:35:11" itemprop="dateCreated datePublished" datetime="2020-03-29T20:35:08+08:00">2020-03-29</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="数据库"><a href="#数据库" class="headerlink" title="数据库"></a>数据库</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">redisServer</span> &#123;</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// 一个数组，保存着服务器中的所有数据库</span></span><br><span class="line">    redisDb *db;</span><br><span class="line">    <span class="comment">// 服务器的数据库数量</span></span><br><span class="line">    <span class="keyword">int</span> dbnum;</span><br><span class="line">    <span class="comment">// 数据库键空间，保存着数据库中的所有键值对</span></span><br><span class="line">    dict *dict;</span><br><span class="line">    <span class="comment">// 过期字典，保存着键的过期时间</span></span><br><span class="line">    dict *expires;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><strong>服务器数据库示例</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbaa3ek7d9j30mk0943z4.jpg" alt="img"></p>
-<p><strong>数据库切换</strong></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set msg &quot;hello world&quot;</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; get msg</span><br><span class="line">&quot;hello world&quot;</span><br><span class="line">127.0.0.1:6379&gt; select 2</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379[2]&gt; get msg</span><br><span class="line">(nil)</span><br></pre></td></tr></table></figure>
-
-<p><strong>数据库键空间</strong><br>RedisDb 结构的 dict 字典保存了数据库中的所有键值对，我们将这个字典成为键空间（key space）<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbaaj7lyftj310g0kkae2.jpg" alt="img"></p>
-<p>除了添加、删除、更新、取值操作外，清空数据库 FLUSHDB 命令，随机返回数据库某键 RANDOMKEY 命令，返回数据库键数 DBSIZE，包括 EXISTS、RENAME、KEYS 等命令都是通过对键空间进行操作实现的。</p>
-<p><strong>过期时间</strong><br>redisDb 结构的 expires 字典保存了数据库所有键的过期时间，这个字典被称为过期字典：</p>
-<ul>
-<li>过期字典的键是一个指针，指向键空间中的某个键对象</li>
-<li>过期字典的值是一个long long类型的整数，保存了过期时间–一个毫秒精确度的 UNIX 时间戳</li>
-</ul>
-<p><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbaazh9t4mj31120pmag4.jpg" alt="img"></p>
-<p><strong>过期键删除策略</strong></p>
-<ul>
-<li>定时删除：创建一个定时器，键过期时立即对键执行删除操作。（对内存友好，对 CPU 不友好）–实际不用这个策略</li>
-<li>惰性删除：在获取键时，如果没过期则获取键，过期则删除键。（对 CPU 友好，对内存不友好）</li>
-<li>定期删除：隔一段时间检查键，删除过期键。（合理设置执行时长和频率）</li>
-</ul>
-<p>惰性删除策略实现<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbb4guvtnyj30yy0gs42p.jpg" alt="img"></p>
-<p><strong>RDB 和 AOF 过期键处理</strong></p>
-<ul>
-<li>RDB：执行 SAVE 命令或 BGSAVE 命令创建一个 RDB 文件时，会对数据库中的键进行检查，过期键不会保存在这个 RDB 文件中。</li>
-<li>AOF：当过期键被惰性删除或定期删除后，程序会向 AOF 文件追加（append）一条 DEL 命令，显式记录该键已被删除。</li>
-<li>RDB 和 AOF 在从服务器中运行时，会保存所有过期键，他们只会同步主服务器的文件。（主服务器同步 RDB 文件会清空从服务器；AOF 文件从服务器接收主服务器发来的 DEL 命令删除过期键）</li>
-</ul>
-<h2 id="RDB-持久化"><a href="#RDB-持久化" class="headerlink" title="RDB 持久化"></a>RDB 持久化</h2><p>我们将服务器中的非空数据库以及它们的键值对统称为数据库状态。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbbfiwvgtij30hq07amy2.jpg" alt="img"><br><strong>Redis 提供了 RDB 持久化功能，将 Redis 在内存中的数据库状态保存在磁盘里，避免数据丢失。</strong><br>RDB 持久化功能所生成的 RDB 文件是一个经过压缩的二进制文件，通过该文件可以还原生成 RDB 文件时的数据库状态。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbbflah8vuj30w206kabq.jpg" alt="img"></p>
-<p><strong>RDB 文件的创建与载入</strong><br>SAVE 和 BGSAVE 都可以生产 RDB 文件<br>SAVE 会阻塞 Redis 服务器进程；BGSAVE 会派生出一个子进程负责创建 RDB 文件，父进程继续处理命令请求。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; save &#x2F;&#x2F; 等待直到 RDB 文件创建完毕</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; bgsave &#x2F;&#x2F; 派生子进程，由子进程创建 RDB 文件</span><br><span class="line">Background saving started</span><br></pre></td></tr></table></figure>
-
-<p>若服务器开启了 AOF 持久化功能，服务器会优先使用 AFO 文件来还原数据。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbbgb845thj30ec0ccjsx.jpg" alt="img"><br>SAVA、BGSAVA、BGREWRITEAOF 三个命令不能同时处于运行状态。</p>
-<p>Redis 载入工作会在服务器启动时自动执行。服务器在载入 RDB 文件期间，会一直处于阻塞状态，直到载入工作完成为止。</p>
-<p><strong>自动间隔性保存</strong><br>Redis 服务器启动时，用户可以通过制定配置文件或者传日启动参数设置 save 选项。<br>save 涉及到的参数</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">redisServer</span> &#123;</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// 记录了保存条件的数组</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">saveparam</span> *<span class="title">saveparams</span>;</span></span><br><span class="line">    <span class="comment">// 修改计数器，记录了距离上次成功保存后，服务器进行了几次修改</span></span><br><span class="line">    <span class="keyword">long</span> <span class="keyword">long</span> dirty;</span><br><span class="line">    <span class="comment">// 上次执行保存的时间</span></span><br><span class="line">    <span class="keyword">time_t</span> lastsave;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br><span class="line">save <span class="number">900</span> <span class="number">1</span>    <span class="comment">// 900秒内对数据库至少进行1次修改</span></span><br><span class="line">save <span class="number">300</span> <span class="number">10</span>   <span class="comment">// 300秒内对数据库至少进行10次修改</span></span><br><span class="line">save <span class="number">60</span> <span class="number">10000</span> <span class="comment">// 60秒内对数据库至少进行10000次修改</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbbgxdojcej30r60beac2.jpg" alt="img"></p>
-<p><strong>RDB 文件结构</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbbkawjkzpj30jy018wen.jpg" alt="img"><br><em>大写单词表示常量，小写单词代表变量和数据</em><br>REDIS：载入文件时判断是否为 RDB 文件<br>EOF：表示文件正文内容结束</p>
-<p>带有2个数据库的完整 RDB 文件<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbbkwo6irxj312y05mgn6.jpg" alt="img"><br>ms：键值对过期的时间戳</p>
-<p><strong>value的编码</strong><br>REDIS_ENCODING_RAW：<br>字符串长度&lt;=20字节，原样保存；字符串长度&gt;20字节，压缩保存<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbblh4oxoqj314u02w75d.jpg" alt="img"></p>
-<h2 id="AOF-持久化"><a href="#AOF-持久化" class="headerlink" title="AOF 持久化"></a>AOF 持久化</h2><p>RDB 持久化通过保存数据库中的键值对来记录数据库状态不同，AOF（Append Only File）持久化是通过保存 Redis 服务器所执行的写命令来记录数据库状态的。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbcdykilq4j30iq04w0td.jpg" alt="img"></p>
-<p><strong>AOF 持久化实现</strong><br>实现分为追加（append）、文件写入、文件同步（sync）三步。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">redisServer</span> &#123;</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// AOF 缓冲区</span></span><br><span class="line">    sds aof_buf;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>命令追加：服务器执行完写命令，会以协议格式将被执行命令追加到 aof_buf 末尾。</p>
-<p><strong>AOF 文件的写入与同步</strong></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">def eventLoop():</span><br><span class="line">    while True:</span><br><span class="line">    &#x2F;&#x2F; 处理文件时间，接受命令请求以及发送命令回复</span><br><span class="line">    &#x2F;&#x2F; 处理命令请求时可能会有新内容被追加到 aof_buf 缓冲区中</span><br><span class="line">    processFIleEvents()</span><br><span class="line">    &#x2F;&#x2F; 处理时间时间</span><br><span class="line">    processTimeEvents()</span><br><span class="line">    &#x2F;&#x2F; 考虑是否要讲 aof_buf 中的内容写入和保存到 AOF 文件里面</span><br><span class="line">    flushAppendOnlyFile()</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbci6ibejyj311m0bmjvv.jpg" alt="img"></p>
-<p><strong>AOF 文件的载入与数据还原</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbcica4duwj30hy0ew76f.jpg" alt="img"></p>
-<p><strong>AOF 重写</strong><br>AOF 重写是通过读取数据库中的键值对来实现的，和现有的 AOF 文件无关。</p>
-<p>在执行 BGREWRITEAOF 命令时，Reis 服务器会维护一个 AOF 重写缓冲区，该缓冲区会在子进程创建新 AOF 文件期间，记录服务器执行的所有写命令。当子进程完成创建新 AOF 文件的工作之后，服务器会将重写缓冲区中的所有内容追加到新 AOF 文件的末尾，使得新旧两个 AOF 文件所保存的数据库状态一致。最后，服务器用新的 AOF 文件替换旧的 AOF 文件，以此来完成 AOF 文件重写操作。</p>
-<p>例子：<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbcj9lzxmtj311k0igwjq.jpg" alt="img"></p>
-<h2 id="事件"><a href="#事件" class="headerlink" title="事件"></a>事件</h2><p>事件分为文件事件和时间事件。</p>
-<p><strong>文件事件</strong><br>文件事件分为 AE_READABLE 事件（读事件） 和 AE_WRITABLE写事（写事件）<br>文件事件是对套接字（socket）操作的抽象：每次套接字变为可应答（acceptable）、可写（writable）或可读（readable）时，相应的文件事件就会产生。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbcldb99msj30pq0i2n0r.jpg" alt="img"></p>
-<p><strong>时间事件</strong><br>时间事件分为定时事件和周期性事件</p>
-<p>服务器将所有时间事件都放在一个无序链表中，时间事件执行器运行时，它遍历整个链表，查找所有已到达的时间事件，并调用相应的时间处理器。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbcmw5aq1jj30vq0bwdit.jpg" alt="img"></p>
-<p><strong>severCron 函数</strong><br><em>默认100ms执行一次</em></p>
-<ul>
-<li>更新服务器的各类统计信息，比如时间、内存占用、数据库占用情况等</li>
-<li>清理数据库中的过期键值对。</li>
-<li>关闭和清理连接失效的客户端。</li>
-<li>尝试进行 AOF 或 RDB 持久化操作。</li>
-<li>如果服务器是主服务器，那么对从服务器进行定期同步。</li>
-<li>如果处于集群模式，对集群进行定期同步和连接测试。</li>
-<li>管理客户端资源和数据库状态</li>
-</ul>
-<p>时间事件和文件事件之间是合作关系，服务器会轮流处理这两种事件，并且处理时间的过程中也不会进行抢占；因为时间事件会在文件事件后执行，所以时间事件实际处理时间会比设定到达的时间稍微晚一些。</p>
-<h2 id="客户端"><a href="#客户端" class="headerlink" title="客户端"></a>客户端</h2><p>部分重要的参数，加 * 的是我的涵义注释，/* 是举例子</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">redisClient</span> &#123;</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// 套接字描述符</span></span><br><span class="line">    <span class="comment">// * fd=-1为伪客户端（来源AOF文件或Lua脚本，不是网络请求不需要套接字），fd&gt;-1为普通客户端</span></span><br><span class="line">    <span class="keyword">int</span> fd;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 当前正在使用的数据库</span></span><br><span class="line">    redisDb *db;</span><br><span class="line">    <span class="comment">// 当前正在使用的数据库的 id （号码）</span></span><br><span class="line">    <span class="keyword">int</span> dictid;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 客户端的名字</span></span><br><span class="line">    <span class="comment">// * 默认是没有名字的，没有设置名字name指向null</span></span><br><span class="line">    robj *name;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 查询缓冲区</span></span><br><span class="line">    <span class="comment">// * 用于保存客户端发送的命令</span></span><br><span class="line">    sds querybuf;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 参数数量</span></span><br><span class="line">    <span class="comment">// * 记录argv的长度</span></span><br><span class="line">    <span class="keyword">int</span> argc;</span><br><span class="line">    <span class="comment">// 参数对象数组</span></span><br><span class="line">    <span class="comment">// * argv是一个数组，如argv[0]是要执行的命令，服务器根据argv[0]的值在命令表里查找命令实现函数</span></span><br><span class="line">    robj **argv;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// * 输出缓冲区分为固定大小缓冲区和可变大小缓冲区两种</span></span><br><span class="line">    <span class="comment">// * 固定大小缓冲区由buf和bufpos组成</span></span><br><span class="line">    <span class="comment">// 回复缓冲区</span></span><br><span class="line">    <span class="keyword">char</span> buf[REDIS_REPLY_CHUNK_BYTES];</span><br><span class="line">    <span class="comment">// 回复偏移量，记录buf数组已使用的字节数</span></span><br><span class="line">    <span class="keyword">int</span> bufpos;</span><br><span class="line">    <span class="comment">// 回复链表</span></span><br><span class="line">    <span class="comment">// * 当buf空间用完了，服务器会开始使用可变大小缓冲区，变大小缓冲区由reply链表和一个或多个字符串对象组成</span></span><br><span class="line">    <span class="built_in">list</span> *reply;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 创建客户端的时间</span></span><br><span class="line">    <span class="keyword">time_t</span> ctime;</span><br><span class="line">    <span class="comment">// 客户端最后一次和服务器互动的时间</span></span><br><span class="line">    <span class="comment">// * 可以用于计算空转（idel）时间 = now - lastinteraction</span></span><br><span class="line">    <span class="keyword">time_t</span> lastinteraction;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 客户端的输出缓冲区超过软性限制的时间</span></span><br><span class="line">    <span class="comment">// * 在一定时间内输出缓冲区大小一直超出软性限制，服务器将关闭客户端（一超出硬性限制就会关闭）</span></span><br><span class="line">    <span class="keyword">time_t</span> obuf_soft_limit_reached_time;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 客户端状态标志</span></span><br><span class="line">    <span class="comment">// * flags记录客户端角色（role）和客户端目前所处的状态</span></span><br><span class="line">    <span class="keyword">int</span> flags;              <span class="comment">/* REDIS_SLAVE | REDIS_MONITOR | REDIS_MULTI ... */</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 当 server.requirepass 不为 NULL 时</span></span><br><span class="line">    <span class="comment">// 代表认证的状态</span></span><br><span class="line">    <span class="comment">// 0 代表未认证， 1 代表已认证</span></span><br><span class="line">    <span class="keyword">int</span> authenticated;</span><br><span class="line">    ...</span><br><span class="line">&#125; redisClient;</span><br></pre></td></tr></table></figure>
-
-<h2 id="服务器"><a href="#服务器" class="headerlink" title="服务器"></a>服务器</h2><p><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbdpxgpivej31em03ejt1.jpg" alt="img"></p>
-<p>命令执行器工作：</p>
-<ol>
-<li>查找命令实现：根据客户端状态的argv[0]参数，在命令表中查找参数所指定的命令，并将找到的命令保存到客户状态的cmd属性中。</li>
-<li>执行预备操作</li>
-<li>调用命令的实现函数</li>
-<li>执行后续工作</li>
 </ol>
 
       
@@ -1670,6 +1316,379 @@
 <p><strong>Sync IO vs AIO</strong><br>Sync IO 每进行一次 IO 操作，需要等待此次操作结束才能继续接下来的操作；AIO 可以在发出一个 IO 请求后立即在发出另一个 IO 请求，当全部 IO 请求发送完毕后，等待所有 IO 操作的完成。</p>
 <p><strong>IO merge</strong><br>将多个 IO 合并为一个 IO，以提高 IOPS 性能。<br>例子：用户需要访问页的（space, page_no）为：(8，6)、(8，7)、(8，8)。每页大小为16K，如果使用同步 IO 需要进行3次 IO 操作；而AIO 会判断这三个页是连续的，因此 AIO 底层会发送一个 IO 请求，从（8，6）开始读 48K 的页</p>
 <p><strong>刷新邻接页</strong><br>当刷新一个脏页时，innodb存储引擎会检测该页所在区(extent)的所有页，如果是脏页，那么一起进行刷新。这样做的好处显而易见，通过AIO可以将多个IO写入操作合并为一个IO操作，增大写入量，减少了物理写IO，故该工作机制在传统机械磁盘下有着显著的优势。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/02/02/Redis%E7%8B%AC%E7%AB%8B%E5%8A%9F%E8%83%BD%E5%AE%9E%E7%8E%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/02/02/Redis%E7%8B%AC%E7%AB%8B%E5%8A%9F%E8%83%BD%E5%AE%9E%E7%8E%B0/" class="post-title-link" itemprop="url">Redis独立功能实现</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-02-02 22:22:27" itemprop="dateCreated datePublished" datetime="2020-02-02T22:22:27+08:00">2020-02-02</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="独立功能实现"><a href="#独立功能实现" class="headerlink" title="独立功能实现"></a>独立功能实现</h1><h2 id="发布与订阅"><a href="#发布与订阅" class="headerlink" title="发布与订阅"></a>发布与订阅</h2><p>Redis 的发布与订阅功能有 <code>PUBLISH、SUBSCRIBE、PSUBSCRIBE</code> 等命令组成。<br>通过执行 <code>SUBSCRIBE</code> 命令，客户端可以订阅一个或多个频道，从而成为这些频道的订阅者（subscriber）：<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbi9aesmvzj312w090jug.jpg" alt="img"><br>客户端可以通过执行 <code>PSUBSCRIBE</code> 命令订阅一个或多个模式，从而成为这些模式的订阅者：<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbi97qzy7oj31bg0be0xw.jpg" alt="img"></p>
+<p><strong>频道和模式的订阅与退订</strong><br><img src="https://tva1.sinaimg.cn/large/0082zybply1gbnx37m3j8j31ew0a8gpj.jpg" alt="img"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">redisServer</span> &#123;</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// 保存所有频道的订阅关系：键是被订阅的频道，值是所有订阅者的链表</span></span><br><span class="line">    <span class="comment">// 若订阅时频道有其他订阅者，则在链表尾部添加该订阅者；若订阅时频道没有其他订阅者，则创建键，再把客户端添加到链表头</span></span><br><span class="line">    <span class="comment">// 退订时也会检查退订者是否为该频道唯一订阅者，若不是则在链表中删除该订阅者，若是连带键（频道）一起删除</span></span><br><span class="line">    dict *pubsub_channels;</span><br><span class="line">    </span><br><span class="line">   <span class="comment">// 保存所有模式订阅关系：链表的每个节点保存着一个pubsubPattern结构，记录了客户端（client）和模式（pattern）</span></span><br><span class="line">   <span class="comment">// 客户端订阅模式时，新建一个与该客户端对应的pubsubPattern结构，添加在链表尾部</span></span><br><span class="line">   <span class="comment">// 客户端退订模式时，会在链表中删除与该客户端对应的模式的pubsubPattern结构</span></span><br><span class="line">   <span class="built_in">list</span> *pubsub_petterns;</span><br><span class="line">   ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>查看订阅消息</strong><br><code>PUBSUB CHANNELS [pattern]</code>用于返回服务器当前被订阅的频道。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">redis&gt; PUBSUB CHANNELS</span><br><span class="line">1) &quot;news.it&quot;</span><br><span class="line">2) &quot;news.sport&quot;</span><br><span class="line">3) &quot;news.bussiness&quot;</span><br><span class="line">4) &quot;news.movie&quot;</span><br><span class="line"></span><br><span class="line">redis&gt; PUBSUB CHANNELS &quot;news.[is]*&quot;</span><br><span class="line">1) &quot;news.it&quot;</span><br><span class="line">2) &quot;news.sport&quot;</span><br></pre></td></tr></table></figure>
+
+<p><code>PUBSUB NUMSUB [channel-1 ... channel-n]</code>用于返回频道的订阅者数量</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">redis&gt; PUBSUB NUMSUB news.it news.sport</span><br><span class="line">1) &quot;news.it&quot;</span><br><span class="line">2) 3</span><br><span class="line">3) &quot;news.sport&quot;</span><br><span class="line">4) 2</span><br></pre></td></tr></table></figure>
+
+<p><code>PUBSUB NUMPAT</code>用于返回服务器当前被订阅模式的数量</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">redis&gt; PUBSUB NUMPAT</span><br><span class="line">(integer) 3</span><br></pre></td></tr></table></figure>
+
+<h2 id="事务"><a href="#事务" class="headerlink" title="事务"></a>事务</h2><p><strong>事务的实现：</strong></p>
+<ol>
+<li>事务开始：<code>MULTI</code></li>
+<li>命令入队：除 <code>EXEC、DISCARD、WATCH、MULTI</code> 外的可执行命令</li>
+<li>事务执行：<code>EXEC</code></li>
+</ol>
+<p><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbibh8ke99j30og0iydjk.jpg" alt="img"></p>
+<p><strong>事务队列（FIFO）</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; MULTI</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; SET &quot;name&quot; &quot;Practical Common Lisp&quot;</span><br><span class="line">QUEUED</span><br><span class="line">127.0.0.1:6379&gt; GET &quot;name&quot;</span><br><span class="line">QUEUED</span><br><span class="line">127.0.0.1:6379&gt; SET &quot;author&quot; &quot;Peter Serbel&quot;</span><br><span class="line">QUEUED</span><br><span class="line">127.0.0.1:6379&gt; GET &quot;author&quot;</span><br><span class="line">QUEUED</span><br><span class="line">127.0.0.1:6379&gt; EXEC</span><br><span class="line">1) OK</span><br><span class="line">2) &quot;Practical Common Lisp&quot;</span><br><span class="line">3) OK</span><br><span class="line">4) &quot;Peter Serbel&quot;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbibkx6gt0j31160m0te8.jpg" alt="img"></p>
+<p><strong>WATCH 命令的实现</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 当前客户端为c100，对c100执行WATCH命令</span><br><span class="line">c100&gt; WATCH &quot;name&quot;</span><br><span class="line">OK</span><br><span class="line">&#x2F;&#x2F; 客户端c100继续向服务器发送MULTI命令</span><br><span class="line">c100&gt; MULTI</span><br><span class="line">OK</span><br><span class="line">&#x2F;&#x2F; c100将一个SET命令放入事务队列</span><br><span class="line">c100&gt; SET &quot;name&quot; &quot;peter&quot;</span><br><span class="line">QUEUE</span><br><span class="line">&#x2F;&#x2F; 另一个客户端c101向服务器发送一条SET命令</span><br><span class="line">c101&gt; SET &quot;name&quot; &quot;john&quot;</span><br><span class="line">OK</span><br><span class="line">&#x2F;&#x2F; c101发的这条命令会使正在监视的name键的所有客户端的REDIS_DIRTY_CAS标识被打开，包括c100</span><br><span class="line">&#x2F;&#x2F; 当c100向服务器发送EXEC命令时，因为c100的REDIS_DIRTY_CAS标识被打开，所以拒绝执行它提交的事务</span><br><span class="line">c100&gt; EXEC</span><br><span class="line">(nil)</span><br></pre></td></tr></table></figure>
+
+<p><strong>事物的ACID性质</strong></p>
+<ol>
+<li>原子性：<br>数据库将事务中的多个操作当作一个整体来执行，要么都执行，要么都不执行。Redis 不支持事物会滚，即使事务中某个命令出现了错误，整个事务也会继续执行，直到都执行完毕为止，执行完了错误也会一并打印出来。</li>
+<li>一致性：<br>数据库在执行之前是一致的（数据符合数据库本身的定义和要求，没有包含非法或无效的错误数据），那执行事务之后无论成功与否数据库也是一致的。</li>
+<li>隔离性：<br>多个事务并发执行，也不会互相影响。</li>
+<li>持久性<br>当事务执行完了之后，所得到的结果会保存到永久性储存介质（如硬盘）中，即使执行事务完毕之后停机了，结果也不会丢失。<br>在 RDB 持久化模式下，需要执行 <code>BGSAVE</code> 才会对数据库进行保存，数据不能第一时间保存到硬盘里，所以 RDB 模式下的事务不具有持久性。<br>在 AOF 持久化模式下，如果 <code>appendfsync</code> 设置为 always，则事务具有持久性，设置为 everysec 或者 no 时不具有持久性</li>
+</ol>
+<h2 id="排序"><a href="#排序" class="headerlink" title="排序"></a>排序</h2><p>SORT 命令通过将被排序键包含的元素载入到数组里面，然后对数组进行排序完成对键进行排序的工作，该操作是有快速排序算法实现的。</p>
+<p><strong>排序过程</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbj8mrtxkxj31gq0hi0zb.jpg" alt="img"></p>
+<p><strong>选项的执行顺序</strong></p>
+<ol>
+<li>排序：命令使用 <code>ALPHA、ASC、DESC、BY</code> 这几个选项对键进行排序。</li>
+<li>限制排序结果集的长度：命令使用 <code>LIMIT</code> 选项对结果集进行限制。</li>
+<li>获取外部键：命令使用 <code>GET</code> 选项，根据排序结果集中的元素，以及 <code>GET</code> 选项制定模式，查找并获取指定键的值，并用这些值来做为新的排序结果集。</li>
+<li>保存结果集：命令使用 <code>STORE</code> 选项，把结果集保存到指定键上去。</li>
+</ol>
+<p><strong>例子</strong><br><code>SORT  ALPHA DESC BY  LIMIT   GET  STORE</code><br><strong>执行顺序</strong><br><code>SORT  ALPHA DESC BY</code> -&gt; <code>LIMIT</code> -&gt; <code>GET</code> -&gt; <code>STORE</code><br><em>除 <code>GET</code> 外，改变选项的摆放顺序，不会影响到SORT命令执行这些选项的顺序</em></p>
+<h2 id="慢查询日志"><a href="#慢查询日志" class="headerlink" title="慢查询日志"></a>慢查询日志</h2><p>服务器状态中包含了几个和慢查询日志功能相关的属性：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">rdisServer</span> &#123;</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// 下一条慢查询日志的ID</span></span><br><span class="line">    <span class="keyword">long</span> <span class="keyword">long</span> slowlog_entry_id;</span><br><span class="line">    <span class="comment">// 保存了所有慢查询日志的链表</span></span><br><span class="line">    <span class="comment">// 每一个节点都保存了一个slowlogEntry结构，每个slowlogEntry结构代表一条慢查询日志</span></span><br><span class="line">    <span class="built_in">list</span> *slowlog;</span><br><span class="line">    <span class="comment">// 指定执行时间超过多少微秒的命令会被记录在日志上</span></span><br><span class="line">    <span class="keyword">long</span> <span class="keyword">long</span> slowlog_log_slower_than;</span><br><span class="line">    <span class="comment">// 指定服务器最多保存多少条慢查询日志</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> slowlog_max_len;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>慢查询相关rdisServer结构</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbjaechecmj30sy0acq51.jpg" alt="img"><br><strong>slowlogEntry结构</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbjaax04qyj30tg0awq55.jpg" alt="img"></p>
+<p><strong>slowlog特性</strong></p>
+<ol>
+<li>打印删除慢查询日志可以通过遍历 slowlog 链表来完成。</li>
+<li>slowlog 链表的长度就是服务器所保存慢查询日志的数量。</li>
+<li>新的慢查询日志会被添加到 slowlog 链表表头，如果日志数量超过<code>slowlog-max-len</code>选项的值，多出来的日志节点会从 slowlog 表尾删除。</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/01/30/Redis%E5%A4%9A%E6%9C%BA%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AE%9E%E7%8E%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/01/30/Redis%E5%A4%9A%E6%9C%BA%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AE%9E%E7%8E%B0/" class="post-title-link" itemprop="url">Redis多机数据库的实现</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-01-30 22:22:27" itemprop="dateCreated datePublished" datetime="2020-01-30T22:22:27+08:00">2020-01-30</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="多机数据库的实现"><a href="#多机数据库的实现" class="headerlink" title="多机数据库的实现"></a>多机数据库的实现</h1><h2 id="复制"><a href="#复制" class="headerlink" title="复制"></a>复制</h2><p>用户通过执行 SLAVEOF 命令或设置 slaveof 选项进行复制。<br>被复制服务器为主服务器，对主服务器进行复制的服务器为从服务器。</p>
+<p><strong>旧版主从复制过程</strong></p>
+<ol>
+<li>从服务器发送 SYNC 命令</li>
+<li>主服务器接收到 SYNC 命令，执行 BGSAVE 命令，后台生成 RDB 文件和缓冲区用于存贮在复制过程中执行的命令</li>
+<li>BGSAVE 命令完成后，主服务器向从服务器发送 RDB 文件，从服务器载入 RDB 文件并恢复数据库状态</li>
+<li>主服务器向从服务器发送缓存区保存的写命令，从服务器执行这些命令</li>
+<li>主服务器对从服务器执行命令传播操作<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbelypepsdj30gk07o0u0.jpg" alt="img"></li>
+</ol>
+<p><strong>为什么要改进旧版主从复制过程中的断线就完整同步的操作：</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbenbyiiqoj30zw0dsagg.jpg" alt="img"></p>
+<p><strong>新版主从复制改进</strong><br>使用 PSYNC 替代 SYNC，具有完整重同步和部分重同步两种模式。<br>完整重同步用于首次复制情况，和旧版的一样。<br>部分重同步摒弃了旧版复制功能在断线重连之后需要重新全部同步的缺陷，在断线重连之后只需要同步之前没同步的那些命令就行了。</p>
+<p><strong>部分重同步功能的构成：</strong></p>
+<ol>
+<li>主从服务器的复制偏移量 - 主从服务器偏移量不一致则进行重同步。</li>
+<li>主服务器的复制积压缓冲区 - 缓冲区是一个固定长度先进先出的队列，如果偏移量在缓冲区里面则进行部分重同步操作，否则进行完整重同步操作</li>
+<li>运行ID - 从服务器保存的运行ID和当前连接的主服务器运行ID相同则进行部分重同步操作，否则进行完整重同步操作。</li>
+</ol>
+<p><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbencrm06nj30pw0lajvp.jpg" alt="img"></p>
+<p><strong>心跳检测</strong><br>在命令传播阶段，从服务器默认每秒一次向主服务器发送命令<code>REPLCONF ACK</code>。该命令有3个作用：</p>
+<ol>
+<li>检测主服务器的网络连接状态，lag 值超过一秒证明主从服务器连接故障。</li>
+<li>辅助实现 min-slaves 配置选项</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">min-slaves-to-write 3</span><br><span class="line">min-slaves-max-lag 10</span><br></pre></td></tr></table></figure>
+
+<p>从服务器数量小于三个或从服务器延迟（lag）值&gt;=10秒，主服务器将拒绝执行写命令。<br>\3. 检测命令丢失 - 通过偏移量来判断命令是否丢失（和部分重同步类似，一个在没有断线时执行，一个在断线时执行）</p>
+<h2 id="Sentinel-哨兵"><a href="#Sentinel-哨兵" class="headerlink" title="Sentinel 哨兵"></a>Sentinel 哨兵</h2><p>Sentinel的故障转移功能<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbfq7bv68hj31210u0n9i.jpg" alt="img"></p>
+<h2 id="集群"><a href="#集群" class="headerlink" title="集群"></a>集群</h2><p>集群通过分片（sharding）来进行数据贡献，并提供复制和故障转移功能。</p>
+<h4 id="节点-node"><a href="#节点-node" class="headerlink" title="节点 node"></a>节点 node</h4><p>节点是运行在集群模式下的 Redis 服务器<br>一个 Redis 集群通常由多个节点（node）组成，一开始每个节点都是独立的，各个独立的节点连接起来构成一个多节点集群。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbfsfdi3bej31hq08ewic.jpg" alt="img"></p>
+<p><strong>节点启动</strong><br>节点会继续使用所有在单机模式下使用的服务器组建，如时间处理器，事件处理器，RDB AOF 持久化模块等。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbfshpcxamj30n008e0ug.jpg" alt="img"></p>
+<p><strong>节点的握手过程</strong></p>
+<ol>
+<li>节点 A 为节点 B 创建一个 clusterNode 结构，并将该结构添加到自己的 clusterState.nodes 字典里</li>
+<li>节点 A 发送 MEET 命令给节点 B</li>
+<li>节点 B 接收到 MEET 命令，为节点 A 创建一个 clusterNode 结构，将该结构添加到自己的 clusterState.nodes 字典里</li>
+<li>节点 B 向节点 A 发送 PONG 消息</li>
+<li>节点 A 接收到 PONG 消息，向节点 B 发送 PING 消息<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbfsmbky3zj30l20640ts.jpg" alt="img"></li>
+</ol>
+<h4 id="指派槽-slot"><a href="#指派槽-slot" class="headerlink" title="指派槽 slot"></a>指派槽 slot</h4><p>集群的整个数据库被分为 16384（214214）个槽，数据库中的每个键都属于着 16384 个槽的其中一个，集群中的每个节点可以处理 0～16384 个槽。<br>如果 16384 个槽都有节点在处理，集群处于上线状态（ok），否则，只要有一个槽没有节点处理，集群就处于下线状态（fail）。</p>
+<p><strong>记录节点的槽指派信息</strong><br><em>取出、设置slots数组的任意一个二进制位的值的复杂度为O(1)</em></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">clusterNode</span> &#123;</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// 长度为2048个字节的二进制数组</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">char</span> slots[<span class="number">16384</span>/<span class="number">8</span>]</span><br><span class="line">    <span class="comment">// 该节点负责处理的槽数量</span></span><br><span class="line">    <span class="keyword">int</span> numslots;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>Redis 根据索引 i 上的二进制位的值来判断节点是否负责处理槽 i：</strong></p>
+<ul>
+<li>如果 slots 数组在索引 i 上的二进制位的值为1，那么表示节点负责处理槽 i。</li>
+<li>如果 slots 数组在索引 i 上的二进制位的值为0，那么表示节点不负责处理槽 i。</li>
+</ul>
+<p><strong>节点负责处理槽1、3、5、8、9、10的例子</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbftvw0ozxj30xm044jsg.jpg" alt="img"></p>
+<p><strong>传播节点槽指派信息</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbfty5ijrlj30dq08yjsk.jpg" alt="img"></p>
+<p><strong>记录集群所有槽的指派信息</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">clusterState</span> &#123;</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// slots数组包含16834个项，每个数组项都是一个指向clusterNode结构的指针</span></span><br><span class="line">    clusterNode *slots[<span class="number">16384</span>]</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过将所有槽的指派信息保存在 clusterState.solts 数组里，程序要检查槽 i 是否被指派，又或者取得负责处理槽 i 的节点，只需要访问 clusterState.solts[i] 的值即可，复杂度为O(1)。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbfudd8ogrj30oo0q0adj.jpg" alt="img"></p>
+<h4 id="在集群中执行命令"><a href="#在集群中执行命令" class="headerlink" title="在集群中执行命令"></a>在集群中执行命令</h4><p>当客户端向节点发送与数据库有关的命令时，接收命令的节点会计算出要处理的数据属于哪个槽：<br>如果所在槽指派给了当前节点，节点直接执行命令；反之节点会向客户端返回一个 MOVED 错误 (在集群模式下不会打印 MOVED 错误)，指引客户端转向正确的节点，并再次发送之前要执行的命令。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbgwutggd9j30r00fkjup.jpg" alt="img"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:7000&gt; set msg &quot;happy new year&quot;</span><br><span class="line">-&gt; Redirected to slot [6257] located at 127.0.0.1:7001</span><br><span class="line"></span><br><span class="line">127.0.0.1:7001&gt; get msg</span><br><span class="line">&quot;happy new year&quot;</span><br></pre></td></tr></table></figure>
+
+<p>节点将键值对保存在数据库里面，用 clusterState 结构中的 slots_to_keys 跳跃表保存槽和键的关系。（节点的分值是一个槽号，节点的成员是一个数据库键）</p>
+<h4 id="重新分片"><a href="#重新分片" class="headerlink" title="重新分片"></a>重新分片</h4><p>Redis 集群重新分片操作可以将任意数量的源节点的槽改为指派给目标节点，槽所属的键值对也会移动到目标节点上。重新分片操作可以在线进行，集群不需要下线。<br><strong>重新分片的过程</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbgygkem90j31a60ic7aa.jpg" alt="img"></p>
+<h4 id="ASK-错误"><a href="#ASK-错误" class="headerlink" title="ASK 错误"></a>ASK 错误</h4><p><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbgzdq4u7oj30o40ck77c.jpg" alt="img"><br><strong>ASK 错误和 MOVED 错误区别</strong><br>MOVED 错误表示槽的负责权已经从一个节点转移到了另一个节点，而 ASK 作物知识两个节点在迁移槽的过程中使用的一种临时措施。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbgzh3dyoqj30nq0e841q.jpg" alt="img"></p>
+<h4 id="复制与故障转移"><a href="#复制与故障转移" class="headerlink" title="复制与故障转移"></a>复制与故障转移</h4><p>Redis 集群中的节点分为主节点 master 和从节点 slave，其中主节点用于处理槽，从节点用于复制主节点，在主节点下线时代替下线节点处理槽。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbh071bedbj318m0fqdm8.jpg" alt="img"></p>
+<p><strong>主从节点的结构</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbh0dr2qpaj30tu0xon1b.jpg" alt="img"></p>
+<p><strong>故障检测</strong></p>
+<ol>
+<li>集群中每一个主节点都会定期向集群中的其他主节点发送 PING 消息，其他节点收到消息会返回一个 PONG 消息。</li>
+<li>当一个节点发送 PING 之后的一定时间内未收到 PONG 消息，则把接收节点 x 标记为疑似下线节点。</li>
+<li>当超过半数的主节点都把 x 节点标记为疑似下线节点，则 x 节点会被标记为下线。</li>
+<li>x 节点的其中一个从节点会竞选成为新的主节点（每个主节点都有投票权，当超过半数的主节点吧支持票投给其中一个从节点，那这个从节点就被选举为新的主节点）</li>
+</ol>
+<h4 id="消息"><a href="#消息" class="headerlink" title="消息"></a>消息</h4><p>集群中的节点通过发送和接收消息来进行通信，常见的消息包括 MEET、PING、PONG、PUBLISH、FAIL 五种。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbh6rhjb7fj30u00wtk0a.jpg" alt="img"></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/01/26/Redis%E5%8D%95%E6%9C%BA%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AE%9E%E7%8E%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/01/26/Redis%E5%8D%95%E6%9C%BA%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AE%9E%E7%8E%B0/" class="post-title-link" itemprop="url">Redis单机数据库的实现</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-01-26 22:22:27" itemprop="dateCreated datePublished" datetime="2020-01-26T22:22:27+08:00">2020-01-26</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="数据库"><a href="#数据库" class="headerlink" title="数据库"></a>数据库</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">redisServer</span> &#123;</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// 一个数组，保存着服务器中的所有数据库</span></span><br><span class="line">    redisDb *db;</span><br><span class="line">    <span class="comment">// 服务器的数据库数量</span></span><br><span class="line">    <span class="keyword">int</span> dbnum;</span><br><span class="line">    <span class="comment">// 数据库键空间，保存着数据库中的所有键值对</span></span><br><span class="line">    dict *dict;</span><br><span class="line">    <span class="comment">// 过期字典，保存着键的过期时间</span></span><br><span class="line">    dict *expires;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>服务器数据库示例</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbaa3ek7d9j30mk0943z4.jpg" alt="img"></p>
+<p><strong>数据库切换</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set msg &quot;hello world&quot;</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; get msg</span><br><span class="line">&quot;hello world&quot;</span><br><span class="line">127.0.0.1:6379&gt; select 2</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379[2]&gt; get msg</span><br><span class="line">(nil)</span><br></pre></td></tr></table></figure>
+
+<p><strong>数据库键空间</strong><br>RedisDb 结构的 dict 字典保存了数据库中的所有键值对，我们将这个字典成为键空间（key space）<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbaaj7lyftj310g0kkae2.jpg" alt="img"></p>
+<p>除了添加、删除、更新、取值操作外，清空数据库 FLUSHDB 命令，随机返回数据库某键 RANDOMKEY 命令，返回数据库键数 DBSIZE，包括 EXISTS、RENAME、KEYS 等命令都是通过对键空间进行操作实现的。</p>
+<p><strong>过期时间</strong><br>redisDb 结构的 expires 字典保存了数据库所有键的过期时间，这个字典被称为过期字典：</p>
+<ul>
+<li>过期字典的键是一个指针，指向键空间中的某个键对象</li>
+<li>过期字典的值是一个long long类型的整数，保存了过期时间–一个毫秒精确度的 UNIX 时间戳</li>
+</ul>
+<p><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbaazh9t4mj31120pmag4.jpg" alt="img"></p>
+<p><strong>过期键删除策略</strong></p>
+<ul>
+<li>定时删除：创建一个定时器，键过期时立即对键执行删除操作。（对内存友好，对 CPU 不友好）–实际不用这个策略</li>
+<li>惰性删除：在获取键时，如果没过期则获取键，过期则删除键。（对 CPU 友好，对内存不友好）</li>
+<li>定期删除：隔一段时间检查键，删除过期键。（合理设置执行时长和频率）</li>
+</ul>
+<p>惰性删除策略实现<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbb4guvtnyj30yy0gs42p.jpg" alt="img"></p>
+<p><strong>RDB 和 AOF 过期键处理</strong></p>
+<ul>
+<li>RDB：执行 SAVE 命令或 BGSAVE 命令创建一个 RDB 文件时，会对数据库中的键进行检查，过期键不会保存在这个 RDB 文件中。</li>
+<li>AOF：当过期键被惰性删除或定期删除后，程序会向 AOF 文件追加（append）一条 DEL 命令，显式记录该键已被删除。</li>
+<li>RDB 和 AOF 在从服务器中运行时，会保存所有过期键，他们只会同步主服务器的文件。（主服务器同步 RDB 文件会清空从服务器；AOF 文件从服务器接收主服务器发来的 DEL 命令删除过期键）</li>
+</ul>
+<h2 id="RDB-持久化"><a href="#RDB-持久化" class="headerlink" title="RDB 持久化"></a>RDB 持久化</h2><p>我们将服务器中的非空数据库以及它们的键值对统称为数据库状态。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbbfiwvgtij30hq07amy2.jpg" alt="img"><br><strong>Redis 提供了 RDB 持久化功能，将 Redis 在内存中的数据库状态保存在磁盘里，避免数据丢失。</strong><br>RDB 持久化功能所生成的 RDB 文件是一个经过压缩的二进制文件，通过该文件可以还原生成 RDB 文件时的数据库状态。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbbflah8vuj30w206kabq.jpg" alt="img"></p>
+<p><strong>RDB 文件的创建与载入</strong><br>SAVE 和 BGSAVE 都可以生产 RDB 文件<br>SAVE 会阻塞 Redis 服务器进程；BGSAVE 会派生出一个子进程负责创建 RDB 文件，父进程继续处理命令请求。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; save &#x2F;&#x2F; 等待直到 RDB 文件创建完毕</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; bgsave &#x2F;&#x2F; 派生子进程，由子进程创建 RDB 文件</span><br><span class="line">Background saving started</span><br></pre></td></tr></table></figure>
+
+<p>若服务器开启了 AOF 持久化功能，服务器会优先使用 AFO 文件来还原数据。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbbgb845thj30ec0ccjsx.jpg" alt="img"><br>SAVA、BGSAVA、BGREWRITEAOF 三个命令不能同时处于运行状态。</p>
+<p>Redis 载入工作会在服务器启动时自动执行。服务器在载入 RDB 文件期间，会一直处于阻塞状态，直到载入工作完成为止。</p>
+<p><strong>自动间隔性保存</strong><br>Redis 服务器启动时，用户可以通过制定配置文件或者传日启动参数设置 save 选项。<br>save 涉及到的参数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">redisServer</span> &#123;</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// 记录了保存条件的数组</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">saveparam</span> *<span class="title">saveparams</span>;</span></span><br><span class="line">    <span class="comment">// 修改计数器，记录了距离上次成功保存后，服务器进行了几次修改</span></span><br><span class="line">    <span class="keyword">long</span> <span class="keyword">long</span> dirty;</span><br><span class="line">    <span class="comment">// 上次执行保存的时间</span></span><br><span class="line">    <span class="keyword">time_t</span> lastsave;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br><span class="line">save <span class="number">900</span> <span class="number">1</span>    <span class="comment">// 900秒内对数据库至少进行1次修改</span></span><br><span class="line">save <span class="number">300</span> <span class="number">10</span>   <span class="comment">// 300秒内对数据库至少进行10次修改</span></span><br><span class="line">save <span class="number">60</span> <span class="number">10000</span> <span class="comment">// 60秒内对数据库至少进行10000次修改</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbbgxdojcej30r60beac2.jpg" alt="img"></p>
+<p><strong>RDB 文件结构</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbbkawjkzpj30jy018wen.jpg" alt="img"><br><em>大写单词表示常量，小写单词代表变量和数据</em><br>REDIS：载入文件时判断是否为 RDB 文件<br>EOF：表示文件正文内容结束</p>
+<p>带有2个数据库的完整 RDB 文件<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbbkwo6irxj312y05mgn6.jpg" alt="img"><br>ms：键值对过期的时间戳</p>
+<p><strong>value的编码</strong><br>REDIS_ENCODING_RAW：<br>字符串长度&lt;=20字节，原样保存；字符串长度&gt;20字节，压缩保存<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbblh4oxoqj314u02w75d.jpg" alt="img"></p>
+<h2 id="AOF-持久化"><a href="#AOF-持久化" class="headerlink" title="AOF 持久化"></a>AOF 持久化</h2><p>RDB 持久化通过保存数据库中的键值对来记录数据库状态不同，AOF（Append Only File）持久化是通过保存 Redis 服务器所执行的写命令来记录数据库状态的。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbcdykilq4j30iq04w0td.jpg" alt="img"></p>
+<p><strong>AOF 持久化实现</strong><br>实现分为追加（append）、文件写入、文件同步（sync）三步。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">redisServer</span> &#123;</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// AOF 缓冲区</span></span><br><span class="line">    sds aof_buf;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>命令追加：服务器执行完写命令，会以协议格式将被执行命令追加到 aof_buf 末尾。</p>
+<p><strong>AOF 文件的写入与同步</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">def eventLoop():</span><br><span class="line">    while True:</span><br><span class="line">    &#x2F;&#x2F; 处理文件时间，接受命令请求以及发送命令回复</span><br><span class="line">    &#x2F;&#x2F; 处理命令请求时可能会有新内容被追加到 aof_buf 缓冲区中</span><br><span class="line">    processFIleEvents()</span><br><span class="line">    &#x2F;&#x2F; 处理时间时间</span><br><span class="line">    processTimeEvents()</span><br><span class="line">    &#x2F;&#x2F; 考虑是否要讲 aof_buf 中的内容写入和保存到 AOF 文件里面</span><br><span class="line">    flushAppendOnlyFile()</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbci6ibejyj311m0bmjvv.jpg" alt="img"></p>
+<p><strong>AOF 文件的载入与数据还原</strong><br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbcica4duwj30hy0ew76f.jpg" alt="img"></p>
+<p><strong>AOF 重写</strong><br>AOF 重写是通过读取数据库中的键值对来实现的，和现有的 AOF 文件无关。</p>
+<p>在执行 BGREWRITEAOF 命令时，Reis 服务器会维护一个 AOF 重写缓冲区，该缓冲区会在子进程创建新 AOF 文件期间，记录服务器执行的所有写命令。当子进程完成创建新 AOF 文件的工作之后，服务器会将重写缓冲区中的所有内容追加到新 AOF 文件的末尾，使得新旧两个 AOF 文件所保存的数据库状态一致。最后，服务器用新的 AOF 文件替换旧的 AOF 文件，以此来完成 AOF 文件重写操作。</p>
+<p>例子：<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbcj9lzxmtj311k0igwjq.jpg" alt="img"></p>
+<h2 id="事件"><a href="#事件" class="headerlink" title="事件"></a>事件</h2><p>事件分为文件事件和时间事件。</p>
+<p><strong>文件事件</strong><br>文件事件分为 AE_READABLE 事件（读事件） 和 AE_WRITABLE写事（写事件）<br>文件事件是对套接字（socket）操作的抽象：每次套接字变为可应答（acceptable）、可写（writable）或可读（readable）时，相应的文件事件就会产生。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbcldb99msj30pq0i2n0r.jpg" alt="img"></p>
+<p><strong>时间事件</strong><br>时间事件分为定时事件和周期性事件</p>
+<p>服务器将所有时间事件都放在一个无序链表中，时间事件执行器运行时，它遍历整个链表，查找所有已到达的时间事件，并调用相应的时间处理器。<br><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbcmw5aq1jj30vq0bwdit.jpg" alt="img"></p>
+<p><strong>severCron 函数</strong><br><em>默认100ms执行一次</em></p>
+<ul>
+<li>更新服务器的各类统计信息，比如时间、内存占用、数据库占用情况等</li>
+<li>清理数据库中的过期键值对。</li>
+<li>关闭和清理连接失效的客户端。</li>
+<li>尝试进行 AOF 或 RDB 持久化操作。</li>
+<li>如果服务器是主服务器，那么对从服务器进行定期同步。</li>
+<li>如果处于集群模式，对集群进行定期同步和连接测试。</li>
+<li>管理客户端资源和数据库状态</li>
+</ul>
+<p>时间事件和文件事件之间是合作关系，服务器会轮流处理这两种事件，并且处理时间的过程中也不会进行抢占；因为时间事件会在文件事件后执行，所以时间事件实际处理时间会比设定到达的时间稍微晚一些。</p>
+<h2 id="客户端"><a href="#客户端" class="headerlink" title="客户端"></a>客户端</h2><p>部分重要的参数，加 * 的是我的涵义注释，/* 是举例子</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">redisClient</span> &#123;</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// 套接字描述符</span></span><br><span class="line">    <span class="comment">// * fd=-1为伪客户端（来源AOF文件或Lua脚本，不是网络请求不需要套接字），fd&gt;-1为普通客户端</span></span><br><span class="line">    <span class="keyword">int</span> fd;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 当前正在使用的数据库</span></span><br><span class="line">    redisDb *db;</span><br><span class="line">    <span class="comment">// 当前正在使用的数据库的 id （号码）</span></span><br><span class="line">    <span class="keyword">int</span> dictid;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 客户端的名字</span></span><br><span class="line">    <span class="comment">// * 默认是没有名字的，没有设置名字name指向null</span></span><br><span class="line">    robj *name;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 查询缓冲区</span></span><br><span class="line">    <span class="comment">// * 用于保存客户端发送的命令</span></span><br><span class="line">    sds querybuf;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 参数数量</span></span><br><span class="line">    <span class="comment">// * 记录argv的长度</span></span><br><span class="line">    <span class="keyword">int</span> argc;</span><br><span class="line">    <span class="comment">// 参数对象数组</span></span><br><span class="line">    <span class="comment">// * argv是一个数组，如argv[0]是要执行的命令，服务器根据argv[0]的值在命令表里查找命令实现函数</span></span><br><span class="line">    robj **argv;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// * 输出缓冲区分为固定大小缓冲区和可变大小缓冲区两种</span></span><br><span class="line">    <span class="comment">// * 固定大小缓冲区由buf和bufpos组成</span></span><br><span class="line">    <span class="comment">// 回复缓冲区</span></span><br><span class="line">    <span class="keyword">char</span> buf[REDIS_REPLY_CHUNK_BYTES];</span><br><span class="line">    <span class="comment">// 回复偏移量，记录buf数组已使用的字节数</span></span><br><span class="line">    <span class="keyword">int</span> bufpos;</span><br><span class="line">    <span class="comment">// 回复链表</span></span><br><span class="line">    <span class="comment">// * 当buf空间用完了，服务器会开始使用可变大小缓冲区，变大小缓冲区由reply链表和一个或多个字符串对象组成</span></span><br><span class="line">    <span class="built_in">list</span> *reply;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 创建客户端的时间</span></span><br><span class="line">    <span class="keyword">time_t</span> ctime;</span><br><span class="line">    <span class="comment">// 客户端最后一次和服务器互动的时间</span></span><br><span class="line">    <span class="comment">// * 可以用于计算空转（idel）时间 = now - lastinteraction</span></span><br><span class="line">    <span class="keyword">time_t</span> lastinteraction;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 客户端的输出缓冲区超过软性限制的时间</span></span><br><span class="line">    <span class="comment">// * 在一定时间内输出缓冲区大小一直超出软性限制，服务器将关闭客户端（一超出硬性限制就会关闭）</span></span><br><span class="line">    <span class="keyword">time_t</span> obuf_soft_limit_reached_time;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 客户端状态标志</span></span><br><span class="line">    <span class="comment">// * flags记录客户端角色（role）和客户端目前所处的状态</span></span><br><span class="line">    <span class="keyword">int</span> flags;              <span class="comment">/* REDIS_SLAVE | REDIS_MONITOR | REDIS_MULTI ... */</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 当 server.requirepass 不为 NULL 时</span></span><br><span class="line">    <span class="comment">// 代表认证的状态</span></span><br><span class="line">    <span class="comment">// 0 代表未认证， 1 代表已认证</span></span><br><span class="line">    <span class="keyword">int</span> authenticated;</span><br><span class="line">    ...</span><br><span class="line">&#125; redisClient;</span><br></pre></td></tr></table></figure>
+
+<h2 id="服务器"><a href="#服务器" class="headerlink" title="服务器"></a>服务器</h2><p><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1gbdpxgpivej31em03ejt1.jpg" alt="img"></p>
+<p>命令执行器工作：</p>
+<ol>
+<li>查找命令实现：根据客户端状态的argv[0]参数，在命令表中查找参数所指定的命令，并将找到的命令保存到客户状态的cmd属性中。</li>
+<li>执行预备操作</li>
+<li>调用命令的实现函数</li>
+<li>执行后续工作</li>
+</ol>
 
       
     </div>
